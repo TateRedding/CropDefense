@@ -53,10 +53,9 @@ public class Play extends MapState implements StateMethods, Serializable {
 
 	private boolean paused, gameOver;
 
-	public Play(Game game, Map map, String saveName) {
+	public Play(Game game, Map map) {
 
 		super(game, map);
-		this.saveName = saveName;
 		cropHandler = new CropHandler(this);
 		enemyHandler = new EnemyHandler(this);
 		projectileHandler = new ProjectileHandler(this);
@@ -264,7 +263,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 	public void upgradeRange(Crop c) {
 
 		if (seeds >= c.getUpgradeCost()) {
-			seeds = c.getUpgradeCost();
+			seeds -= c.getUpgradeCost();
 			c.upgradeRange();
 		}
 
@@ -292,10 +291,18 @@ public class Play extends MapState implements StateMethods, Serializable {
 	public void saveGame() {
 
 		paused = true;
-		unsavedChanges = false;
-		LoadSave.saveGame(this, saveName);
-		game.getLoadGame().initSaveButtons();
-		justSaved = true;
+
+		if (unsavedChanges == false)
+			return;
+
+		if (saveName != null) {
+			unsavedChanges = false;
+			LoadSave.saveGame(this, saveName);
+			game.getLoadGame().initSaveButtons();
+			game.getSaveGame().initSaveButtons();
+			justSaved = true;
+		} else
+			GameStates.setGameState(GameStates.SAVE_GAME);
 
 	}
 
@@ -405,6 +412,10 @@ public class Play extends MapState implements StateMethods, Serializable {
 
 	public String getSaveName() {
 		return saveName;
+	}
+
+	public void setSaveName(String saveName) {
+		this.saveName = saveName;
 	}
 
 	public int getSeeds() {

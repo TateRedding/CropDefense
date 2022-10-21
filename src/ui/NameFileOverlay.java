@@ -14,7 +14,7 @@ import java.io.File;
 
 import gamestates.EditMap;
 import gamestates.GameStates;
-import gamestates.PlayNewGame;
+import gamestates.SaveGame;
 import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
@@ -24,9 +24,9 @@ public class NameFileOverlay {
 
 	private EditMap editMap;
 	private OverwriteOverlay overwriteOverlay;
-	private PlayNewGame playNewGame;
+	private SaveGame saveGame;
 	private TextBox textBox;
-	private TextButton start, cancel;
+	private TextButton save, cancel;
 
 	private int mapID;
 	private int x, y, width, height;
@@ -47,10 +47,9 @@ public class NameFileOverlay {
 
 	}
 
-	public NameFileOverlay(PlayNewGame playNewMap, int mapID) {
+	public NameFileOverlay(SaveGame saveGame) {
 
-		this.playNewGame = playNewMap;
-		this.mapID = mapID;
+		this.saveGame = saveGame;
 		this.overwriteOverlay = new OverwriteOverlay(this);
 		this.width = ImageLoader.overlayBG.getWidth();
 		this.height = ImageLoader.overlayBG.getHeight();
@@ -72,7 +71,10 @@ public class NameFileOverlay {
 
 		xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 5;
-		start = new TextButton(TEXT_LARGE, "Start", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
+		String text = "Save";
+		if (editMap != null)
+			text = "Start";
+		save = new TextButton(TEXT_LARGE, text, GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 		cancel = new TextButton(TEXT_LARGE, "Cancel", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 
 	}
@@ -84,7 +86,7 @@ public class NameFileOverlay {
 		else {
 
 			textBox.update();
-			start.update();
+			save.update();
 			cancel.update();
 
 		}
@@ -104,7 +106,7 @@ public class NameFileOverlay {
 			String text = "";
 			if (editMap != null)
 				text = "Name your new map";
-			else if (playNewGame != null)
+			else if (saveGame != null)
 				text = "Name your save file";
 
 			int xStart = x + width / 2 - g.getFontMetrics().stringWidth(text) / 2;
@@ -112,7 +114,7 @@ public class NameFileOverlay {
 			g.drawString(text, xStart, yStart);
 
 			textBox.draw(g);
-			start.draw(g);
+			save.draw(g);
 			cancel.draw(g);
 
 			if (invalidSaveName) {
@@ -147,12 +149,11 @@ public class NameFileOverlay {
 
 	}
 
-	public void startNewGame() {
+	public void saveGame() {
 
-		Map map = playNewGame.getGame().getMapHandler().getMaps().get(mapID);
-		playNewGame.getGame().startNewGame(map, textBox.getText());
-		LoadSave.saveGame(playNewGame.getGame().getPlay(), textBox.getText());
-		playNewGame.getGame().getLoadGame().initSaveButtons();
+		saveGame.getGame().getPlay().setSaveName(textBox.getText());
+		saveGame.getGame().getPlay().saveGame();
+		saveGame.setNameFileOverlay(null);
 		GameStates.setGameState(GameStates.PLAY);
 
 	}
@@ -163,8 +164,8 @@ public class NameFileOverlay {
 			overwriteOverlay.mousePressed(x, y);
 		else {
 
-			if (start.getBounds().contains(x, y))
-				start.setMousePressed(true);
+			if (save.getBounds().contains(x, y))
+				save.setMousePressed(true);
 			else if (cancel.getBounds().contains(x, y))
 				cancel.setMousePressed(true);
 		}
@@ -176,20 +177,19 @@ public class NameFileOverlay {
 		if (overwriting)
 			overwriteOverlay.mouseReleased(x, y);
 		else {
-
-			if (start.getBounds().contains(x, y) && start.isMousePressed()) {
+			if (save.getBounds().contains(x, y) && save.isMousePressed()) {
 				if (textBox.getText().length() > 0) {
 					if (editMap != null) {
 						File mapFile = new File(
 								LoadSave.mapPath + File.separator + textBox.getText() + LoadSave.mapFileExtension);
 						if (mapFile.exists()) {
 							overwriting = true;
-							start.setMousePressed(false);
+							save.setMousePressed(false);
 							return;
 						}
 						startNewMap();
 						editMap.setNameFileOverlay(null);
-					} else if (playNewGame != null) {
+					} else if (saveGame != null) {
 						if (textBox.getText().equals("Empty")) {
 							invalidSaveName = true;
 						} else {
@@ -197,11 +197,10 @@ public class NameFileOverlay {
 									+ LoadSave.saveFileExtension);
 							if (saveFile.exists()) {
 								overwriting = true;
-								start.setMousePressed(false);
+								save.setMousePressed(false);
 								return;
 							}
-							startNewGame();
-							playNewGame.setNameFileOverlay(null);
+							saveGame();
 						}
 					}
 				}
@@ -210,13 +209,13 @@ public class NameFileOverlay {
 					editMap.setNameFileOverlay(null);
 					editMap.setNamingMap(false);
 				}
-				if (playNewGame != null) {
-					playNewGame.setNameFileOverlay(null);
-					playNewGame.setNamingMap(false);
+				if (saveGame != null) {
+					saveGame.setNameFileOverlay(null);
+					saveGame.setNamingFile(false);
 				}
 			}
 
-			start.setMousePressed(false);
+			save.setMousePressed(false);
 			cancel.setMousePressed(false);
 
 		}
@@ -231,8 +230,8 @@ public class NameFileOverlay {
 		return editMap;
 	}
 
-	public PlayNewGame getPlayNewGame() {
-		return playNewGame;
+	public SaveGame getSaveGame() {
+		return saveGame;
 	}
 
 	public void setOverwriting(boolean overwriting) {

@@ -4,7 +4,6 @@ import static helps.Constants.Buttons.BLUE;
 import static helps.Constants.Buttons.TEXT_LARGE;
 
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -18,17 +17,13 @@ import helps.LoadSave;
 import main.Game;
 import objects.Map;
 import ui.MapButton;
-import ui.NameFileOverlay;
 import ui.TextButton;
 
 public abstract class MapSelect extends State implements StateMethods {
 
 	protected MapHandler mapHandler;
-	protected NameFileOverlay nameFileOverlay;
 	protected TextButton menu;
 	protected ArrayList<MapButton> buttons = new ArrayList<>();
-
-	protected boolean namingFile;
 
 	protected MapSelect(Game game) {
 
@@ -45,9 +40,6 @@ public abstract class MapSelect extends State implements StateMethods {
 	@Override
 	public void update() {
 
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.update();
-
 		menu.update();
 		for (MapButton b : buttons)
 			b.update();
@@ -63,9 +55,6 @@ public abstract class MapSelect extends State implements StateMethods {
 		menu.draw(g);
 		for (MapButton b : buttons)
 			b.draw(g);
-
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.draw(g);
 
 	}
 
@@ -96,8 +85,6 @@ public abstract class MapSelect extends State implements StateMethods {
 	@Override
 	public void mousePressed(int x, int y) {
 
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.mousePressed(x, y);
 		if (menu.getBounds().contains(x, y))
 			menu.setMousePressed(true);
 		else
@@ -112,8 +99,6 @@ public abstract class MapSelect extends State implements StateMethods {
 
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
 			GameStates.setGameState(GameStates.MENU);
-			nameFileOverlay = null;
-			namingFile = false;
 			if (game.getEditMap() != null)
 				game.getEditMap().initMapButtons();
 			else if (game.getPlayNewGame() != null)
@@ -132,21 +117,6 @@ public abstract class MapSelect extends State implements StateMethods {
 	@Override
 	public void mouseMoved(int x, int y) {
 
-	}
-
-	public void keyPressed(KeyEvent e) {
-
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.keyPressed(e);
-
-	}
-
-	public void setNameFileOverlay(NameFileOverlay nameFileOverlay) {
-		this.nameFileOverlay = nameFileOverlay;
-	}
-
-	public void setNamingMap(boolean namingMap) {
-		this.namingFile = namingMap;
 	}
 
 }

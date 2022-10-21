@@ -13,6 +13,7 @@ import gamestates.LoadGame;
 import gamestates.Menu;
 import gamestates.Play;
 import gamestates.PlayNewGame;
+import gamestates.SaveGame;
 import gamestates.Tutorial;
 import handlers.MapHandler;
 import handlers.TileHandler;
@@ -47,6 +48,7 @@ public class Game implements Runnable {
 	private Menu menu;
 	private Play play;
 	private PlayNewGame playNewGame;
+	private SaveGame saveGame;
 	private TileHandler tileHandler;
 	private Tutorial tutorial;
 
@@ -87,6 +89,7 @@ public class Game implements Runnable {
 		loadGame = new LoadGame(this);
 		menu = new Menu(this);
 		playNewGame = new PlayNewGame(this);
+		saveGame = new SaveGame(this);
 
 	}
 
@@ -158,6 +161,9 @@ public class Game implements Runnable {
 		case PLAY_NEW_GAME:
 			playNewGame.update();
 			break;
+		case SAVE_GAME:
+			saveGame.update();
+			break;
 		case TUTORIAL:
 			tutorial.update();
 			break;
@@ -191,6 +197,9 @@ public class Game implements Runnable {
 		case PLAY_NEW_GAME:
 			playNewGame.render(g);
 			break;
+		case SAVE_GAME:
+			saveGame.render(g);
+			break;
 		case TUTORIAL:
 			tutorial.render(g);
 			break;
@@ -199,8 +208,8 @@ public class Game implements Runnable {
 		}
 	}
 
-	public void startNewGame(Map map, String saveName) {
-		play = new Play(this, map, saveName);
+	public void startNewGame(Map map) {
+		play = new Play(this, map);
 	}
 
 	public void editMap(Map map) {
@@ -267,6 +276,10 @@ public class Game implements Runnable {
 
 	public PlayNewGame getPlayNewGame() {
 		return playNewGame;
+	}
+
+	public SaveGame getSaveGame() {
+		return saveGame;
 	}
 
 	public Tutorial getTutorial() {

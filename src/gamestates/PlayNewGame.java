@@ -13,9 +13,10 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import helps.ImageLoader;
 import main.Game;
+import objects.Map;
 import ui.MapButton;
-import ui.NameFileOverlay;
 import ui.TextButton;
 
 public class PlayNewGame extends MapSelect {
@@ -65,11 +66,10 @@ public class PlayNewGame extends MapSelect {
 
 	public void render(Graphics g) {
 
-		if (game.getLoadGame().getSaveFiles().length >= maxSaves) {
+		super.render(g);
+
+		if (game.getLoadGame().getSaveFiles().length >= maxSaves)
 			drawTooManySavesMessage(g);
-			menu.draw(g);
-		} else
-			super.render(g);
 
 		if (buttons.size() == 0)
 			drawNoMapsMessage(g);
@@ -80,32 +80,44 @@ public class PlayNewGame extends MapSelect {
 
 	private void drawTooManySavesMessage(Graphics g) {
 
+		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.textBGLarge.getWidth() / 2;
+		int yStart = 100;
+		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight(), null);
+
 		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
 		g.setColor(Color.BLACK);
-		String text = "Too many save files!";
-		int xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		int yStart = Game.SCREEN_HEIGHT / 2;
+		String text = "WARNING: There are no empty save slots!";
+		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
+		yStart += ImageLoader.textBGLarge.getHeight() / 2;
 		g.drawString(text, xStart, yStart);
 
-		text = "Please delete one in order to start a new game.";
+		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 25));
+		text = "You will need to delete one if you wish to save your new game.";
 		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += g.getFontMetrics().getHeight();
+		yStart += g.getFontMetrics().getHeight() / 5 * 4;
 		g.drawString(text, xStart, yStart);
 
 	}
 
 	private void drawNoMapsMessage(Graphics g) {
 
+		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.textBGLarge.getWidth() / 2;
+		int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.textBGLarge.getHeight() / 2;
+		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight(), null);
+
 		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
 		g.setColor(Color.BLACK);
 		String text = "No maps to play on!";
-		int xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		int yStart = Game.SCREEN_HEIGHT / 2;
+		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
+		yStart += ImageLoader.textBGLarge.getHeight() / 2;
 		g.drawString(text, xStart, yStart);
 
+		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 25));
 		text = "Please create a map to start a new game.";
 		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += g.getFontMetrics().getHeight();
+		yStart += g.getFontMetrics().getHeight() / 5 * 4;
 		g.drawString(text, xStart, yStart);
 
 	}
@@ -123,16 +135,15 @@ public class PlayNewGame extends MapSelect {
 
 		super.mouseReleased(x, y);
 
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.mouseReleased(x, y);
-		else if (tutorial.getBounds().contains(x, y) && tutorial.isMousePressed()) {
+		if (tutorial.getBounds().contains(x, y) && tutorial.isMousePressed()) {
 			game.setTutorial(new Tutorial(game, Tutorial.PLAY_TUTORIAL));
 			GameStates.setGameState(GameStates.TUTORIAL);
 		} else {
 			for (int i = 0; i < buttons.size(); i++)
 				if (buttons.get(i).getBounds().contains(x, y) && buttons.get(i).isMousePressed()) {
-					this.nameFileOverlay = new NameFileOverlay(this, i);
-					namingFile = true;
+					Map map = game.getMapHandler().getMaps().get(i);
+					game.startNewGame(map);
+					GameStates.setGameState(GameStates.PLAY);
 				}
 		}
 

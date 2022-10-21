@@ -2,7 +2,7 @@ package gamestates;
 
 public enum GameStates {
 
-	CREDITS, EDIT, EDIT_MAP, LOAD_GAME, MENU, PLAY, PLAY_NEW_GAME, TUTORIAL;
+	CREDITS, EDIT, EDIT_MAP, LOAD_GAME, MENU, PLAY, PLAY_NEW_GAME, SAVE_GAME, TUTORIAL;
 
 	public static GameStates gameState = MENU;
 

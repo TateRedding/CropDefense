@@ -106,6 +106,10 @@ public abstract class MapState extends State implements StateMethods, Serializab
 		inGameArea = false;
 	}
 
+	public Map getMap() {
+		return map;
+	}
+
 	public boolean isUnsavedChanges() {
 		return unsavedChanges;
 	}

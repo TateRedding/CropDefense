@@ -82,8 +82,8 @@ public class OverwriteOverlay {
 		if (okay.getBounds().contains(x, y) && okay.isMousePressed()) {
 			if (nameFileOverlay.getEditMap() != null)
 				nameFileOverlay.startNewMap();
-			else if (nameFileOverlay.getPlayNewGame() != null)
-				nameFileOverlay.startNewGame();
+			else if (nameFileOverlay.getSaveGame() != null)
+				nameFileOverlay.saveGame();
 		} else if (cancel.getBounds().contains(x, y) && cancel.isMousePressed())
 			nameFileOverlay.setOverwriting(false);
 

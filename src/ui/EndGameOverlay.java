@@ -110,7 +110,10 @@ public class EndGameOverlay {
 			if (reload.getBounds().contains(x, y) && reload.isMousePressed()) {
 				File saveFile = new File(
 						LoadSave.savePath + File.separator + play.getSaveName() + LoadSave.saveFileExtension);
-				play.getGame().loadGame(saveFile);
+				if (saveFile.exists())
+					play.getGame().loadGame(saveFile);
+				else
+					play.getGame().startNewGame(play.getMap());
 			}
 
 		menu.setMousePressed(false);

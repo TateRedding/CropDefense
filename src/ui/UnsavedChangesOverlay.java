@@ -123,18 +123,22 @@ public class UnsavedChangesOverlay {
 			} else if (play != null) {
 				play.setUnsavedChangesOverlay(null);
 				play.setUnsavedOverlayActive(false);
-				play.saveGame();
-				if (exitCode == EXIT_TO_MENU)
-					GameStates.setGameState(GameStates.MENU);
-				else if (exitCode == QUIT)
-					System.exit(0);
+				if (play.getSaveName() == null) {
+					GameStates.setGameState(GameStates.SAVE_GAME);
+				} else {
+					play.saveGame();
+					if (exitCode == EXIT_TO_MENU)
+						GameStates.setGameState(GameStates.MENU);
+					else if (exitCode == QUIT)
+						System.exit(0);
+				}
 			}
 		} else if (cont.getBounds().contains(x, y) && cont.isMousePressed()) {
-			if (exitCode == 1) {
+			if (exitCode == EXIT_TO_MENU) {
 				GameStates.setGameState(GameStates.MENU);
 				if (edit != null)
 					edit.getGame().getMapHandler().loadMaps();
-			} else if (exitCode == 0)
+			} else if (exitCode == QUIT)
 				System.exit(exitCode);
 		} else if (cancel.getBounds().contains(x, y) && cancel.isMousePressed()) {
 			if (edit != null) {

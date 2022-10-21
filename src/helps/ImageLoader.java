@@ -36,11 +36,20 @@ import main.Game;
 import objects.Map;
 import objects.Tile;
 
+/**
+ * 
+ * This class is used to load all images used in the game into BufferdImage
+ * static objects, as BufferedImage is not serializable and therefore can not be
+ * saved along with other objects using the ObjectInputStream to create save
+ * files for Map or Play objects.
+ *
+ */
+
 public class ImageLoader {
 
 	public static ArrayList<ArrayList<BufferedImage>> tileSprites;
-	public static BufferedImage background, credits, cropDisplayBG, newMapThumbnail, missingThumbnail, overlayBG,
-			uiBGBeige, uiBGBlue, heart, seedPacket, seeds;
+	public static BufferedImage background, credits, creditsBG, cropDisplayBG, heart, newMapThumbnail, missingThumbnail,
+			overlayBG, seedPacket, seeds, textBGLarge, textBGSmall, uiBGBeige, uiBGBlue;
 	public static BufferedImage[] bellPepperSprites, chiliSprites, cornSprites, pathPointSprites, tomatoSprites,
 			tutorialEdit, tutorialPlay, waterFrames;
 	public static BufferedImage[][] crowSprites, crowSpritesLeft, moldSprites, moldSpritesLeft, mapButtons,
@@ -145,7 +154,10 @@ public class ImageLoader {
 		background = LoadSave.loadImage(LoadSave.BACKGROUND);
 		cropDisplayBG = LoadSave.loadImage(LoadSave.CROP_DISPLAY_BG);
 		credits = LoadSave.loadImage(LoadSave.CREDITS);
+		creditsBG = LoadSave.loadImage(LoadSave.CREDITS_BG);
 		overlayBG = LoadSave.loadImage(LoadSave.OVERLAY_BG);
+		textBGLarge = LoadSave.loadImage(LoadSave.TEXT_BG_LARGE);
+		textBGSmall = LoadSave.loadImage(LoadSave.TEXT_BG_SMALL);
 		uiBGBeige = LoadSave.loadImage(LoadSave.UI_BG_BEIGE);
 		uiBGBlue = LoadSave.loadImage(LoadSave.UI_BG_BLUE);
 

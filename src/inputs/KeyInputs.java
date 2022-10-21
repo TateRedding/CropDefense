@@ -34,9 +34,9 @@ public class KeyInputs implements KeyListener {
 			break;
 		case PLAY:
 			gameScreen.getGame().getPlay().keyPressed(e);
-		case PLAY_NEW_GAME:
-			gameScreen.getGame().getPlayNewGame().keyPressed(e);
 			break;
+		case SAVE_GAME:
+			gameScreen.getGame().getSaveGame().keyPressed(e);
 		default:
 			break;
 		}

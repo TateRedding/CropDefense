@@ -1,0 +1,14 @@
+Version 0.0.1
+
+Save files for games are no longer created as soon as a new game is started.
+Save files are now only created if a player chooses to save their game after the game has begun.
+This way, a player can play a game from start to finish and not have to take up a save slot in doing so.
+
+Minor changes to texts when starting a new game or selecting a file to either load or delete.
+Added some background images behind these text for easier readability.
+
+Credits are now two separate images, one for the background, one for the text.
+
+Some very minor balancing and bug fixes.
+
+Added a few comments to the code.

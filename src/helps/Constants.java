@@ -96,13 +96,13 @@ public class Constants {
 
 			switch (cropType) {
 			case BELL_PEPPER:
-				return 25.0f;
+				return 30.0f;
 			case CHILI:
-				return 4.0f;
+				return 3.5f;
 			case CORN:
 				return 12.0f;
 			case TOMATO:
-				return 5.0f;
+				return 7.0f;
 			}
 
 			return 0.0f;
@@ -112,11 +112,12 @@ public class Constants {
 
 			switch (cropType) {
 			case BELL_PEPPER:
+				return 144.0f;
 			case CHILI:
-				return 125.0f;
+				return 128.0f;
 			case CORN:
 			case TOMATO:
-				return 175.0f;
+				return 160.0f;
 			}
 
 			return 0.0f;

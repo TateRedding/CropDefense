@@ -25,6 +25,7 @@ public class LoadSave {
 	public static final String CHILI_SPRITES = "chili.png";
 	public static final String CORN_SPRITES = "corn.png";
 	public static final String CREDITS = "credits.png";
+	public static final String CREDITS_BG = "credits_bg.png";
 	public static final String CROP_DISPLAY_BG = "crop_display_bg.png";
 	public static final String CROW_SPRITES = "crow.png";
 	public static final String ICON_SPRITES = "icons.png";
@@ -34,6 +35,8 @@ public class LoadSave {
 	public static final String PATH_POINTS = "path_points.png";
 	public static final String PROJECTILE_SPRITES = "projectiles.png";
 	public static final String SQUARE_BUTTONS = "square_buttons.png";
+	public static final String TEXT_BG_LARGE = "text_bg_large.png";
+	public static final String TEXT_BG_SMALL = "text_bg_small.png";
 	public static final String TEXT_BUTTONS_LARGE = "text_buttons_large.png";
 	public static final String TEXT_BUTTONS_SMALL = "text_buttons_small.png";
 	public static final String TILE_ATLAS = "terrain.png";

@@ -190,7 +190,7 @@ public class ActionBar extends UIBar {
 			g.drawString("" + getCropName(selectedCrop.getCropType()), xStart, yStart);
 			g.drawString("ID: " + selectedCrop.getId(), xStart, yStart += yOffset);
 			g.drawString("Damage: " + (int) selectedCrop.getDamage(), xStart, yStart += yOffset);
-			float range = Math.round((selectedCrop.getRange() / Game.TILE_SIZE * 100) / 100.0f);
+			float range = Math.round(selectedCrop.getRange() / Game.TILE_SIZE * 100) / 100.0f;
 			g.drawString("Range: " + range, xStart, yStart += yOffset);
 
 			// Price Messages

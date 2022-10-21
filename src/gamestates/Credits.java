@@ -38,6 +38,8 @@ public class Credits extends State implements StateMethods {
 		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.credits.getWidth() / 2;
 		int yStart = (Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT) / 2 - ImageLoader.credits.getHeight() / 2;
 
+		g.drawImage(ImageLoader.creditsBG, xStart, yStart, ImageLoader.creditsBG.getWidth(),
+				ImageLoader.creditsBG.getHeight(), null);
 		g.drawImage(ImageLoader.credits, xStart, yStart, ImageLoader.credits.getWidth(),
 				ImageLoader.credits.getHeight(), null);
 
