@@ -1,12 +1,15 @@
 package enemies;
 
 import static helps.Constants.Enemies.CROW;
+import static helps.Constants.Enemies.CROW_BOSS;
 import static helps.Constants.Enemies.MOLD;
+import static helps.Constants.Enemies.MOLD_BOSS;
 import static helps.Constants.Enemies.WORM;
-import static main.Game.TILE_SIZE;
+import static helps.Constants.Enemies.WORM_BOSS;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -20,7 +23,6 @@ public class EnemyHandler implements Serializable {
 	private Play play;
 	private ArrayList<Enemy> enemies = new ArrayList<>();
 
-	private int hpBarWidth = 20;
 	private int id;
 
 	public EnemyHandler(Play play) {
@@ -51,15 +53,23 @@ public class EnemyHandler implements Serializable {
 	}
 
 	private void drawEnemy(Enemy e, Graphics g) {
-		g.drawImage(ImageLoader.getEnemySprites(e.getEnemyType(), e.getDirection())[e.getAnimation()][e
-				.getAnimationIndex()], e.getBounds().x, e.getBounds().y, TILE_SIZE, TILE_SIZE, null);
+
+		BufferedImage sprite = ImageLoader.getEnemySprites(e.getEnemyType(), e.getDirection())[e.getAnimation()][e
+				.getAnimationIndex()];
+
+		g.drawImage(sprite, e.getBounds().x, e.getBounds().y, null);
+
 	}
 
 	private void drawHealthBar(Enemy e, Graphics g) {
 
-		int healthWidth = getHealthWidth(e);
+		int hpBarWidth = 20;
+		if (e.getEnemyType() == CROW_BOSS || e.getEnemyType() == MOLD_BOSS || e.getEnemyType() == WORM_BOSS)
+			hpBarWidth = 50;
 
-		int x = e.getBounds().x + (TILE_SIZE - hpBarWidth) / 2;
+		int healthWidth = (int) (hpBarWidth * e.getHealthPercentage());
+
+		int x = e.getBounds().x + (e.getBounds().width - hpBarWidth) / 2;
 		int y = e.getBounds().y;
 
 		g.setColor(Color.RED);
@@ -81,19 +91,23 @@ public class EnemyHandler implements Serializable {
 		case CROW:
 			enemies.add(new Crow(play.getNextPath(), id++, this));
 			break;
+		case CROW_BOSS:
+			enemies.add(new CrowBoss(play.getNextPath(), id++, this));
+			break;
 		case MOLD:
 			enemies.add(new Mold(play.getNextPath(), id++, this));
+			break;
+		case MOLD_BOSS:
+			enemies.add(new MoldBoss(play.getNextPath(), id++, this));
 			break;
 		case WORM:
 			enemies.add(new Worm(play.getNextPath(), id++, this));
 			break;
 		default:
+		case WORM_BOSS:
+			enemies.add(new WormBoss(play.getNextPath(), id++, this));
 			break;
 		}
-	}
-
-	private int getHealthWidth(Enemy e) {
-		return (int) (hpBarWidth * e.getHealthPercentage());
 	}
 
 	public Play getPlay() {

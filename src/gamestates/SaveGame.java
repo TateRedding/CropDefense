@@ -1,8 +1,13 @@
 package gamestates;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
+import helps.ImageLoader;
+import helps.LoadSave;
 import main.Game;
 import ui.NameFileOverlay;
 import ui.TextButton;
@@ -15,23 +20,23 @@ public class SaveGame extends SaveSelect {
 	private boolean namingFile;
 
 	public SaveGame(Game game) {
-
 		super(game);
-
-	}
-
-	public void update() {
-
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.update();
-
-		super.update();
-
 	}
 
 	public void render(Graphics g) {
 
 		super.render(g);
+
+		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.textBGLarge.getWidth() / 2;
+		int yStart = buttons.get(0).getBounds().y - ImageLoader.textBGLarge.getHeight() - 25;
+		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, null);
+
+		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
+		g.setColor(Color.BLACK);
+		String text = "Select a slot to save your game.";
+		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
+		yStart += ImageLoader.textBGLarge.getHeight() / 2 + g.getFontMetrics().getHeight() / 5 * 2;
+		g.drawString(text, xStart, yStart);
 
 		if (namingFile && nameFileOverlay != null)
 			nameFileOverlay.draw(g);
@@ -65,18 +70,34 @@ public class SaveGame extends SaveSelect {
 					nameFileOverlay = null;
 					namingFile = false;
 				}
-			}
+			} else if (selectedFile != null) {
+				if (delete.getBounds().contains(x, y) && delete.isMousePressed())
+					deleting = true;
+				if (deleting) {
+					if (yes.getBounds().contains(x, y) && yes.isMousePressed()) {
+						selectedFile.delete();
+						initSaveButtons();
+						selectedFile = null;
+						deleting = false;
+					} else if (no.getBounds().contains(x, y) && no.isMousePressed())
+						deleting = false;
+				}
 
+			}
 			for (TextButton b : buttons)
 				if (b.getBounds().contains(x, y) && b.isMousePressed())
-					if (b.getText().equals("Empty")) {
+					if (!b.getText().equals("Empty")) {
+						File saveFile = new File(
+								LoadSave.savePath + File.separator + b.getText() + LoadSave.saveFileExtension);
+						selectedFile = saveFile;
+					} else {
 						nameFileOverlay = new NameFileOverlay(this);
 						namingFile = true;
 					}
 
-			super.mouseReleased(x, y);
-
 		}
+
+		super.mouseReleased(x, y);
 
 	}
 

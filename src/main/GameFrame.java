@@ -37,12 +37,14 @@ public class GameFrame extends JFrame {
 				Play play = gameScreen.getGame().getPlay();
 				Edit edit = gameScreen.getGame().getEdit();
 
-				if (GameStates.gameState == GameStates.PLAY && play != null && play.isUnsavedChanges()
-						&& !play.isGameOver()) {
+				if ((GameStates.gameState == GameStates.PLAY || GameStates.gameState == GameStates.SAVE_GAME)
+						&& play != null && play.isUnsavedChanges() && !play.isGameOver()) {
 					play.setPaused(true);
 					play.setUnsavedChangesOverlay(
 							new UnsavedChangesOverlay(gameScreen.getGame().getPlay(), UnsavedChangesOverlay.QUIT));
 					play.setUnsavedOverlayActive(true);
+					if (GameStates.gameState == GameStates.SAVE_GAME)
+						GameStates.setGameState(GameStates.PLAY);
 				} else if (GameStates.gameState == GameStates.EDIT && edit != null && edit.isUnsavedChanges()) {
 					edit.setUnsavedChangesOverlay(
 							new UnsavedChangesOverlay(gameScreen.getGame().getEdit(), UnsavedChangesOverlay.QUIT));

@@ -28,15 +28,13 @@ public class NameFileOverlay {
 	private TextBox textBox;
 	private TextButton save, cancel;
 
-	private int mapID;
 	private int x, y, width, height;
 
 	private boolean overwriting, invalidSaveName;
 
-	public NameFileOverlay(EditMap editMap, int mapID) {
+	public NameFileOverlay(EditMap editMap) {
 
 		this.editMap = editMap;
-		this.mapID = mapID;
 		this.overwriteOverlay = new OverwriteOverlay(this);
 		this.width = ImageLoader.overlayBG.getWidth();
 		this.height = ImageLoader.overlayBG.getHeight();
@@ -99,7 +97,7 @@ public class NameFileOverlay {
 			overwriteOverlay.draw(g);
 		else {
 
-			g.drawImage(ImageLoader.overlayBG, x, y, width, height, null);
+			g.drawImage(ImageLoader.overlayBG, x, y, null);
 
 			g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
 
@@ -141,7 +139,7 @@ public class NameFileOverlay {
 
 		Map newMap = new Map(textBox.getText());
 		LoadSave.saveMap(newMap, textBox.getText());
-		editMap.getGame().getMapHandler().getMaps().add(mapID, newMap);
+		editMap.getGame().getMapHandler().loadMaps();
 		editMap.getGame().editMap(newMap);
 		editMap.initMapButtons();
 		editMap.getGame().getPlayNewGame().initMapButtons();

@@ -34,9 +34,9 @@ public class TextButton extends Button {
 	private void drawBackground(Graphics g) {
 
 		if (buttonSize == TEXT_SMALL) {
-			g.drawImage(ImageLoader.textButtonsSmall[buttonColor][index], x, y, width, height, null);
+			g.drawImage(ImageLoader.textButtonsSmall[buttonColor][index], x, y, null);
 		} else
-			g.drawImage(ImageLoader.textButtonsLarge[buttonColor][index], x, y, width, height, null);
+			g.drawImage(ImageLoader.textButtonsLarge[buttonColor][index], x, y, null);
 
 	}
 

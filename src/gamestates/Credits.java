@@ -32,16 +32,13 @@ public class Credits extends State implements StateMethods {
 	@Override
 	public void render(Graphics g) {
 
-		g.drawImage(ImageLoader.background, 0, 0, ImageLoader.background.getWidth(), ImageLoader.background.getHeight(),
-				null);
+		g.drawImage(ImageLoader.background, 0, 0, null);
 
 		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.credits.getWidth() / 2;
 		int yStart = (Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT) / 2 - ImageLoader.credits.getHeight() / 2;
 
-		g.drawImage(ImageLoader.creditsBG, xStart, yStart, ImageLoader.creditsBG.getWidth(),
-				ImageLoader.creditsBG.getHeight(), null);
-		g.drawImage(ImageLoader.credits, xStart, yStart, ImageLoader.credits.getWidth(),
-				ImageLoader.credits.getHeight(), null);
+		g.drawImage(ImageLoader.creditsBG, xStart, yStart, null);
+		g.drawImage(ImageLoader.credits, xStart, yStart, null);
 
 		menu.draw(g);
 

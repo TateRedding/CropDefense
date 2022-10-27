@@ -1,21 +1,16 @@
 package gamestates;
 
-import static helps.Constants.Buttons.BEIGE;
 import static helps.Constants.Buttons.BLUE;
 import static helps.Constants.Buttons.BROWN;
 import static helps.Constants.Buttons.MAP;
 import static helps.Constants.Buttons.TEXT_LARGE;
-import static helps.Constants.Buttons.TEXT_SMALL;
 import static helps.Constants.Buttons.getButtonHeight;
 import static helps.Constants.Buttons.getButtonWidth;
 import static ui.UIBar.UI_HEIGHT;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import helps.ImageLoader;
 import helps.LoadSave;
@@ -28,12 +23,9 @@ import ui.TextButton;
 public class EditMap extends MapSelect {
 
 	private NameFileOverlay nameFileOverlay;
-	private TextButton tutorial, load, delete, yes, no;
-	private File selectedFile;
+	private TextButton tutorial, load;
 
-	private int maxMaps = 3;
-
-	private boolean deleting, namingFile;
+	private boolean namingFile;
 
 	public EditMap(Game game) {
 
@@ -46,9 +38,10 @@ public class EditMap extends MapSelect {
 	public void initMapButtons() {
 
 		buttons.clear();
+		mapNames = new String[mapHandler.getMapFiles().size()];
 
 		int x = Game.SCREEN_WIDTH / 2 - getButtonWidth(MAP) / 2;
-		int yOffset = 30;
+		int yOffset = ImageLoader.mapNameBG.getHeight() + 5;
 		int y = (Game.SCREEN_HEIGHT + UI_HEIGHT - (getButtonHeight(MAP) * maxMaps + yOffset * maxMaps - 1)) / 2;
 
 		for (int i = 0; i < maxMaps; i++) {
@@ -56,6 +49,9 @@ public class EditMap extends MapSelect {
 			if (mapHandler.getMaps().size() >= i + 1) {
 				Map currMap = mapHandler.getMaps().get(i);
 				thumbnail = getThumbnail(currMap);
+				String fileName = mapHandler.getMapFiles().get(i).getName();
+				String mapName = fileName.substring(0, fileName.length() - LoadSave.mapFileExtension.length());
+				mapNames[i] = mapName;
 			} else
 				thumbnail = ImageLoader.newMapThumbnail;
 
@@ -71,18 +67,10 @@ public class EditMap extends MapSelect {
 		tutorial = new TextButton(TEXT_LARGE, "Tutorial", BROWN, Game.SCREEN_WIDTH - 10 - getButtonWidth(TEXT_LARGE),
 				10);
 
-		int mapButtonRightEdge = buttons.get(0).getBounds().x + buttons.get(0).getBounds().width;
-		int xStart = mapButtonRightEdge + (Game.SCREEN_WIDTH - mapButtonRightEdge) / 2 - getButtonWidth(TEXT_LARGE) / 2;
+		int xStart = Game.SCREEN_WIDTH / 4 * 3 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 10;
 		int yStart = Game.SCREEN_HEIGHT / 2 - (yOffset + getButtonHeight(TEXT_LARGE)) / 2;
 		load = new TextButton(TEXT_LARGE, "Load", BROWN, xStart, yStart);
-		yStart += yOffset + getButtonHeight(TEXT_LARGE);
-		delete = new TextButton(TEXT_LARGE, "Delete", BROWN, xStart, yStart);
-
-		yStart += yOffset + getButtonHeight(TEXT_LARGE);
-		yes = new TextButton(TEXT_SMALL, "Yes", BEIGE, xStart, yStart);
-		xStart = delete.getBounds().x + delete.getBounds().width - getButtonWidth(TEXT_SMALL);
-		no = new TextButton(TEXT_SMALL, "No", BEIGE, xStart, yStart);
 
 	}
 
@@ -92,91 +80,38 @@ public class EditMap extends MapSelect {
 			nameFileOverlay.update();
 
 		super.update();
-
 		tutorial.update();
-
-		if (selectedFile != null) {
+		if (selectedFile != null)
 			load.update();
-			delete.update();
-			if (deleting) {
-				yes.update();
-				no.update();
-			}
-		}
 
 	}
 
 	public void render(Graphics g) {
 
 		super.render(g);
-
 		tutorial.draw(g);
-
-		if (selectedFile != null) {
+		if (selectedFile != null)
 			load.draw(g);
-			delete.draw(g);
-			if (deleting) {
-				int xStart = load.getBounds().x + load.getBounds().width / 2 - ImageLoader.textBGSmall.getWidth() / 2;
-				int yStart = load.getBounds().y - ImageLoader.textBGSmall.getHeight() - 10;
-				g.drawImage(ImageLoader.textBGSmall, xStart, yStart, ImageLoader.textBGSmall.getWidth(),
-						ImageLoader.textBGSmall.getHeight(), null);
-				g.setColor(Color.BLACK);
-				g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 23));
-				String text = "Are you sure you want";
-				xStart = load.getBounds().x + load.getBounds().width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-				yStart += ImageLoader.textBGSmall.getHeight() / 2 - 5;
-				g.drawString(text, xStart, yStart);
-
-				text = "to delete this file?";
-				xStart = load.getBounds().x + load.getBounds().width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-				yStart += g.getFontMetrics().getHeight() / 5 * 4;
-				g.drawString(text, xStart, yStart);
-				yes.draw(g);
-				no.draw(g);
-			}
-		}
 
 		if (namingFile && nameFileOverlay != null)
 			nameFileOverlay.draw(g);
 
 	}
 
-	private void deleteSelectedFile() {
-
-		String fileName = selectedFile.getName();
-		File thumbnail = new File(LoadSave.mapPath + File.separator
-				+ fileName.substring(0, fileName.length() - LoadSave.mapFileExtension.length()) + "_thumbnail.png");
-		thumbnail.delete();
-		selectedFile.delete();
-		mapHandler.loadMaps();
-		initMapButtons();
-		game.getPlayNewGame().initMapButtons();
-		selectedFile = null;
-		deleting = false;
-
-	}
-
 	public void mousePressed(int x, int y) {
-
-		if (namingFile && nameFileOverlay != null)
-			nameFileOverlay.mousePressed(x, y);
 
 		super.mousePressed(x, y);
 
-		if (tutorial.getBounds().contains(x, y))
-			tutorial.setMousePressed(true);
+		if (namingFile && nameFileOverlay != null)
+			nameFileOverlay.mousePressed(x, y);
+		else {
 
-		if (selectedFile != null) {
-			if (load.getBounds().contains(x, y))
-				load.setMousePressed(true);
-			else if (delete.getBounds().contains(x, y))
-				delete.setMousePressed(true);
-			if (deleting) {
-				if (yes.getBounds().contains(x, y))
-					yes.setMousePressed(true);
-				else if (no.getBounds().contains(x, y))
-					no.setMousePressed(true);
-			}
+			if (tutorial.getBounds().contains(x, y))
+				tutorial.setMousePressed(true);
+			if (selectedFile != null)
+				if (load.getBounds().contains(x, y))
+					load.setMousePressed(true);
+
 		}
 
 	}
@@ -184,14 +119,18 @@ public class EditMap extends MapSelect {
 	public void mouseReleased(int x, int y) {
 
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
-			super.mouseReleased(x, y);
+			GameStates.setGameState(GameStates.MENU);
+			initMapButtons();
+			game.getPlayNewGame().initMapButtons();
 			nameFileOverlay = null;
 			namingFile = false;
 			deleting = false;
+			selectedFile = null;
 		} else if (tutorial.getBounds().contains(x, y) && tutorial.isMousePressed()) {
 			game.setTutorial(new Tutorial(game, Tutorial.EDIT_TUTORIAL));
 			GameStates.setGameState(GameStates.TUTORIAL);
 		}
+
 		if (namingFile && nameFileOverlay != null)
 			nameFileOverlay.mouseReleased(x, y);
 		else {
@@ -214,25 +153,19 @@ public class EditMap extends MapSelect {
 
 			for (int i = 0; i < maxMaps; i++)
 				if (buttons.get(i).getBounds().contains(x, y) && buttons.get(i).isMousePressed()) {
-					if (mapHandler.getMaps().size() >= i + 1) {
-						selectedFile = mapHandler.getMapFiles()[i];
-					} else {
-						this.nameFileOverlay = new NameFileOverlay(this, i);
+					if (mapHandler.getMaps().size() >= i + 1)
+						selectedFile = mapHandler.getMapFiles().get(i);
+					else {
+						this.nameFileOverlay = new NameFileOverlay(this);
 						namingFile = true;
 						selectedFile = null;
 					}
 				}
-
 		}
 
+		super.mouseReleased(x, y);
 		tutorial.setMousePressed(false);
 		load.setMousePressed(false);
-		delete.setMousePressed(false);
-		yes.setMousePressed(false);
-		no.setMousePressed(false);
-
-		for (MapButton b : buttons)
-			b.setMousePressed(false);
 
 	}
 

@@ -48,10 +48,11 @@ public class Play extends MapState implements StateMethods, Serializable {
 	private int selectedCropType = -1;
 	private int selectedCropColorIndex = -1;
 	private int currentPathIndex;
+	private int currentWave = 1, totalWaves;
 	private int seeds = 100;
 	private int lives = 5;
 
-	private boolean paused, gameOver;
+	private boolean paused, gameOver, lifeLostThisWave;
 
 	public Play(Game game, Map map) {
 
@@ -61,6 +62,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 		projectileHandler = new ProjectileHandler(this);
 		waveHandler = new WaveHandler(this);
 		actionBar = new ActionBar(this);
+		this.totalWaves = waveHandler.getWaves().size();
 
 		initPaths();
 
@@ -163,7 +165,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 		if (inGameArea && selectedCropType != -1) {
 			int range = (int) getDefaultRange(selectedCropType);
 			BufferedImage sprite = ImageLoader.getCropSprites(selectedCropType)[selectedCropColorIndex];
-			g.drawImage(sprite, mouseX, mouseY, Game.TILE_SIZE, Game.TILE_SIZE, null);
+			g.drawImage(sprite, mouseX, mouseY, null);
 			g.setColor(Color.RED);
 			g.drawOval((mouseX + Game.TILE_SIZE / 2) - range, (mouseY + Game.TILE_SIZE / 2) - range, range * 2,
 					range * 2);
@@ -235,6 +237,10 @@ public class Play extends MapState implements StateMethods, Serializable {
 
 	}
 
+	public void increaseWaveCount() {
+		currentWave++;
+	}
+
 	public boolean canAffordCrop(int cropType) {
 		return seeds >= getCropCost(cropType);
 	}
@@ -273,10 +279,15 @@ public class Play extends MapState implements StateMethods, Serializable {
 		seeds += getReward(enemyType);
 	}
 
-	public void hurtPlayer() {
+	public void gainLife() {
+		lives++;
+	}
 
-		lives--;
-		if (lives == 0) {
+	public void hurtPlayer(int hurtAmount) {
+
+		lives -= hurtAmount;
+		lifeLostThisWave = true;
+		if (lives <= 0) {
 			paused = true;
 			endGameOverlay = new EndGameOverlay(this, EndGameOverlay.LOSE);
 			gameOver = true;
@@ -394,6 +405,14 @@ public class Play extends MapState implements StateMethods, Serializable {
 		return gameOver;
 	}
 
+	public boolean isLifeLostThisWave() {
+		return lifeLostThisWave;
+	}
+
+	public void setLifeLostThisWave(boolean lifeLostThisWave) {
+		this.lifeLostThisWave = lifeLostThisWave;
+	}
+
 	public void setGameOver(boolean gameOver) {
 		this.gameOver = gameOver;
 	}
@@ -416,6 +435,14 @@ public class Play extends MapState implements StateMethods, Serializable {
 
 	public void setSaveName(String saveName) {
 		this.saveName = saveName;
+	}
+
+	public int getCurrentWave() {
+		return currentWave;
+	}
+
+	public int getTotalWaves() {
+		return totalWaves;
 	}
 
 	public int getSeeds() {

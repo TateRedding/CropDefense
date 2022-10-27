@@ -183,18 +183,27 @@ public class Constants {
 	public static class Enemies {
 
 		public static final int CROW = 0;
-		public static final int MOLD = 1;
-		public static final int WORM = 2;
+		public static final int CROW_BOSS = 1;
+		public static final int MOLD = 2;
+		public static final int MOLD_BOSS = 3;
+		public static final int WORM = 4;
+		public static final int WORM_BOSS = 5;
 
 		public static int getReward(int enemyType) {
 
 			switch (enemyType) {
 			case CROW:
-				return 20;
-			case MOLD:
-				return 30;
-			case WORM:
 				return 10;
+			case CROW_BOSS:
+				return 70;
+			case MOLD:
+				return 15;
+			case MOLD_BOSS:
+				return 105;
+			case WORM:
+				return 5;
+			case WORM_BOSS:
+				return 35;
 			}
 
 			return 0;
@@ -206,10 +215,16 @@ public class Constants {
 			switch (enemyType) {
 			case CROW:
 				return 0.7f;
+			case CROW_BOSS:
+				return 0.525f;
 			case MOLD:
 				return 0.4f;
+			case MOLD_BOSS:
+				return 0.3f;
 			case WORM:
 				return 0.5f;
+			case WORM_BOSS:
+				return 0.375f;
 			}
 
 			return 0;
@@ -221,10 +236,16 @@ public class Constants {
 			switch (enemyType) {
 			case CROW:
 				return 150;
+			case CROW_BOSS:
+				return 1500;
 			case MOLD:
 				return 275;
+			case MOLD_BOSS:
+				return 2750;
 			case WORM:
 				return 115;
+			case WORM_BOSS:
+				return 1150;
 			}
 
 			return 0;

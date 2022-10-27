@@ -64,7 +64,7 @@ public class EndGameOverlay {
 
 	public void draw(Graphics g) {
 
-		g.drawImage(ImageLoader.overlayBG, x, y, width, height, null);
+		g.drawImage(ImageLoader.overlayBG, x, y, null);
 
 		g.setColor(Color.BLACK);
 		String text = "You ";

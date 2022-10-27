@@ -73,10 +73,9 @@ public class EditorBar extends UIBar {
 
 	public void draw(Graphics g) {
 
-		g.setColor(Color.BLACK);
-		g.fillRect(0, Game.SCREEN_HEIGHT, UI_WIDTH, UI_HEIGHT);
-		g.drawImage(ImageLoader.tileSprites.get(0).get(0), 0, Game.SCREEN_HEIGHT, UI_WIDTH, UI_HEIGHT, null);
-		g.drawImage(ImageLoader.uiBGBlue, 0, Game.SCREEN_HEIGHT, UI_WIDTH, UI_HEIGHT, null);
+		g.setColor(new Color(141, 196, 53));
+		g.fillRect(X, Y, UI_WIDTH, UI_HEIGHT);
+		g.drawImage(ImageLoader.uiBGBlue, X, Y, null);
 
 		menu.draw(g);
 		save.draw(g);

@@ -52,7 +52,7 @@ public class ProjectileHandler implements Serializable {
 
 		for (Enemy e : play.getEnemyHandler().getEnemies())
 			if (e.isAlive())
-				if (e.getBounds().contains(p.getPosition())) {
+				if (e.getBounds().intersects(p.getBounds())) {
 					e.hurt(p.getDamage());
 					return true;
 				}
@@ -63,8 +63,8 @@ public class ProjectileHandler implements Serializable {
 
 	private boolean isOutsideBounds(Projectile p) {
 
-		if (p.getPosition().x >= 0 && p.getPosition().x <= SCREEN_WIDTH && p.getPosition().y >= 0
-				&& p.getPosition().y <= SCREEN_HEIGHT)
+		if (p.getBounds().x >= 0 && p.getBounds().x <= SCREEN_WIDTH && p.getBounds().y >= 0
+				&& p.getBounds().y <= SCREEN_HEIGHT)
 			return false;
 
 		return true;
@@ -74,8 +74,9 @@ public class ProjectileHandler implements Serializable {
 	public void draw(Graphics g) {
 
 		for (Projectile p : projectiles)
-			if (p.isActive())
+			if (p.isActive()) {
 				drawProjectile(p, g);
+			}
 
 	}
 
@@ -83,13 +84,13 @@ public class ProjectileHandler implements Serializable {
 
 		Graphics2D g2d = (Graphics2D) g;
 
-		g2d.translate(p.getPosition().x, p.getPosition().y);
-		g2d.rotate(Math.toRadians(p.getRotation()));
+		int xMid = p.getBounds().x + p.getBounds().width / 2;
+		int yMid = p.getBounds().y + p.getBounds().height / 2;
+		g2d.rotate(Math.toRadians(p.getRotation()), xMid, yMid);
 
-		g2d.drawImage(ImageLoader.projectileSprites[p.getProjectileType()][p.getColorIndex()], -(TILE_SIZE / 4),
-				-(TILE_SIZE / 4), TILE_SIZE / 2, TILE_SIZE / 2, null);
-		g2d.rotate(-Math.toRadians(p.getRotation()));
-		g2d.translate(-p.getPosition().x, -p.getPosition().y);
+		g2d.drawImage(ImageLoader.projectileSprites[p.getProjectileType()][p.getColorIndex()], p.getBounds().x,
+				p.getBounds().y, null);
+		g2d.rotate(-Math.toRadians(p.getRotation()), xMid, yMid);
 
 	}
 
@@ -97,8 +98,8 @@ public class ProjectileHandler implements Serializable {
 
 		int projectileType = getProjectileType(c);
 
-		int xDist = (int) (c.getX() - e.getBounds().x);
-		int yDist = (int) (c.getY() - e.getBounds().y);
+		int xDist = ((int) (c.getX()) + TILE_SIZE / 2) - (e.getBounds().x + e.getBounds().width / 2);
+		int yDist = ((int) (c.getY()) + TILE_SIZE / 2) - (e.getBounds().y + e.getBounds().height / 2);
 		int totDist = Math.abs(xDist) + Math.abs(yDist);
 
 		float xPer = (float) Math.abs(xDist) / totDist;
@@ -106,14 +107,13 @@ public class ProjectileHandler implements Serializable {
 		float xSpeed = xPer * helps.Constants.Projectiles.getSpeed(projectileType);
 		float ySpeed = helps.Constants.Projectiles.getSpeed(projectileType) - xSpeed;
 
-		if (c.getX() > e.getBounds().x)
+		if ((c.getX() + TILE_SIZE / 2) > (e.getBounds().x + e.getBounds().width / 2))
 			xSpeed *= -1;
-		if (c.getY() > e.getBounds().y)
+		if ((c.getY() + TILE_SIZE / 2) > (e.getBounds().y + e.getBounds().height / 2))
 			ySpeed *= -1;
 
-		float rotation = 0;
 		float arcValue = (float) Math.atan(yDist / (float) xDist);
-		rotation = (float) Math.toDegrees(arcValue);
+		float rotation = (float) Math.toDegrees(arcValue);
 
 		if (xDist < 0)
 			rotation += 180;
@@ -166,10 +166,6 @@ public class ProjectileHandler implements Serializable {
 
 	public ArrayList<Projectile> getProjectiles() {
 		return projectiles;
-	}
-
-	public void setProjectiles(ArrayList<Projectile> projectiles) {
-		this.projectiles = projectiles;
 	}
 
 }

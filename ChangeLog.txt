@@ -12,3 +12,34 @@ Credits are now two separate images, one for the background, one for the text.
 Some very minor balancing and bug fixes.
 
 Added a few comments to the code.
+
+
+
+Version 0.1
+
+Added boss enemies!
+
+Players can now gain a life if a wave is completed without losing a life.
+
+Added more waves, and edited existing ones.
+
+More minor balancing.
+
+Players are no longer able to select a crop they can't afford.
+
+Added a wave counter and an enemy counter to the action bar.
+
+Names of maps are now displayed above the respective map button and thumbnail when selecting a map to play on or edit.
+Name of the selected map is also displayed when choosing a map to play or edit similar to selecting a game save file.
+
+Added some text to the save game screen to signify that you are in fact there to save your game, as it looked too identical to the load game screen.
+
+Fixed bug where crops were incorrectly calculating whether or not an enemy was in range to attack.
+
+Fixed bug where crops were aiming for the bottom right corner of an enemy's hitbox as opposed to the center.
+
+Fixed bug where the save game screen would not warn a user that the game is not saved if the user clicked the 'X' to quit.
+
+Fixed bug where projectiles were calculating their trajectory based on the top right corner of the crop, though they originate from the middle.
+
+Further organization and abstraction of codebase

@@ -42,8 +42,7 @@ public class CropHandler implements Serializable {
 	}
 
 	private void drawCrop(Crop c, Graphics g) {
-		g.drawImage(ImageLoader.getCropSprites(c.getCropType())[c.getColorIndex()], c.getX(), c.getY(), TILE_SIZE,
-				TILE_SIZE, null);
+		g.drawImage(ImageLoader.getCropSprites(c.getCropType())[c.getColorIndex()], c.getX(), c.getY(), null);
 	}
 
 	public void plantCrop(int cropType, int colorIndex, int x, int y) {

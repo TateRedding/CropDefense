@@ -1,7 +1,5 @@
 package main;
 
-import static ui.UIBar.UI_HEIGHT;
-
 import java.awt.Dimension;
 import java.awt.Graphics;
 
@@ -9,6 +7,7 @@ import javax.swing.JPanel;
 
 import inputs.KeyInputs;
 import inputs.MouseInputs;
+import ui.UIBar;
 
 public class GameScreen extends JPanel {
 
@@ -32,7 +31,7 @@ public class GameScreen extends JPanel {
 
 	private void setPanelSize() {
 
-		Dimension size = new Dimension(Game.SCREEN_WIDTH, Game.SCREEN_HEIGHT + UI_HEIGHT);
+		Dimension size = new Dimension(Game.SCREEN_WIDTH, Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT);
 		setPreferredSize(size);
 
 	}

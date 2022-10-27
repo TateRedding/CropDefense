@@ -74,7 +74,7 @@ public class UnsavedChangesOverlay {
 
 	public void draw(Graphics g) {
 
-		g.drawImage(ImageLoader.overlayBG, x, y, width, height, null);
+		g.drawImage(ImageLoader.overlayBG, x, y, null);
 
 		g.setColor(Color.BLACK);
 		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 22));

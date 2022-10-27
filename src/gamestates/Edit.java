@@ -109,7 +109,7 @@ public class Edit extends MapState implements StateMethods {
 				BufferedImage sprite = ImageLoader.pathPointSprites[START];
 				int x = sp.getPoint().x * Game.TILE_SIZE;
 				int y = sp.getPoint().y * Game.TILE_SIZE;
-				g.drawImage(sprite, x, y, Game.TILE_SIZE, Game.TILE_SIZE, null);
+				g.drawImage(sprite, x, y, null);
 			}
 
 		for (PathPoint ep : endPoints)
@@ -117,7 +117,7 @@ public class Edit extends MapState implements StateMethods {
 				BufferedImage sprite = ImageLoader.pathPointSprites[END];
 				int x = ep.getPoint().x * Game.TILE_SIZE;
 				int y = ep.getPoint().y * Game.TILE_SIZE;
-				g.drawImage(sprite, x, y, Game.TILE_SIZE, Game.TILE_SIZE, null);
+				g.drawImage(sprite, x, y, null);
 			}
 
 	}
@@ -135,7 +135,7 @@ public class Edit extends MapState implements StateMethods {
 				sprite = ImageLoader.pathPointSprites[selectedPointType];
 			}
 
-			g.drawImage(sprite, mouseX, mouseY, Game.TILE_SIZE, Game.TILE_SIZE, null);
+			g.drawImage(sprite, mouseX, mouseY, null);
 		}
 	}
 

@@ -28,7 +28,7 @@ public class MapButton extends Button {
 	}
 
 	private void drawBackground(Graphics g) {
-		g.drawImage(ImageLoader.mapButtons[buttonColor][index], x, y, width, height, null);
+		g.drawImage(ImageLoader.mapButtons[buttonColor][index], x, y, null);
 	}
 
 	private void drawThumbnail(Graphics g) {
@@ -37,7 +37,7 @@ public class MapButton extends Button {
 		if (mousePressed)
 			yStart += 4;
 
-		g.drawImage(thumbnail, x + 4, yStart, thumbnail.getWidth(), thumbnail.getHeight(), null);
+		g.drawImage(thumbnail, x + 4, yStart, null);
 
 	}
 

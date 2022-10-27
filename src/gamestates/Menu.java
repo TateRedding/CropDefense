@@ -56,8 +56,7 @@ public class Menu extends State implements StateMethods {
 	@Override
 	public void render(Graphics g) {
 
-		g.drawImage(ImageLoader.background, 0, 0, ImageLoader.background.getWidth(), ImageLoader.background.getHeight(),
-				null);
+		g.drawImage(ImageLoader.background, 0, 0, null);
 
 		for (TextButton b : buttons)
 			b.draw(g);

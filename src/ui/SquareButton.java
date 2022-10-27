@@ -28,7 +28,7 @@ public class SquareButton extends Button {
 	}
 
 	private void drawBackground(Graphics g) {
-		g.drawImage(ImageLoader.squareButtons[buttonColor][index], x, y, width, height, null);
+		g.drawImage(ImageLoader.squareButtons[buttonColor][index], x, y, null);
 
 	}
 

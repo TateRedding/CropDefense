@@ -79,14 +79,13 @@ public class Crop implements Serializable {
 
 	public Enemy getEnemyInRange() {
 
-		int cropXMid = (x - TILE_SIZE / 2);
-		int cropYMid = (y - TILE_SIZE / 2);
+		int cropXMid = (x + TILE_SIZE / 2);
+		int cropYMid = (y + TILE_SIZE / 2);
 
 		for (Enemy e : cropHandler.getPlay().getEnemyHandler().getEnemies()) {
 			if (e.isAlive()) {
-				int enemyXMid = ((int) e.getBounds().x - TILE_SIZE / 2);
-				int enemyYMid = ((int) e.getBounds().y - TILE_SIZE / 2);
-
+				int enemyXMid = (((int) e.getBounds().x) + (e.getBounds().width / 2));
+				int enemyYMid = (((int) e.getBounds().y) + (e.getBounds().height / 2));
 				if (enemyXMid < 0 || enemyXMid > Game.SCREEN_WIDTH || enemyYMid < 0 || enemyYMid > Game.SCREEN_HEIGHT)
 					return null;
 
@@ -95,6 +94,7 @@ public class Crop implements Serializable {
 
 				if (Math.sqrt((xDist * xDist) + (yDist * yDist)) <= (double) range)
 					return e;
+
 			}
 		}
 

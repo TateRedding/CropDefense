@@ -62,8 +62,7 @@ public class Tutorial extends State implements StateMethods {
 		menu.draw(g);
 
 		if (screenshots != null) {
-			g.drawImage(screenshots[screenIndex], 0, 0, screenshots[screenIndex].getWidth(),
-					screenshots[screenIndex].getHeight(), null);
+			g.drawImage(screenshots[screenIndex], 0, 0, null);
 			if (screenIndex < screenshots.length - 1)
 				next.draw(g);
 			else

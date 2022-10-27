@@ -4,6 +4,9 @@ import static helps.Constants.Directions.DOWN;
 import static helps.Constants.Directions.LEFT;
 import static helps.Constants.Directions.RIGHT;
 import static helps.Constants.Directions.UP;
+import static helps.Constants.Enemies.CROW_BOSS;
+import static helps.Constants.Enemies.MOLD_BOSS;
+import static helps.Constants.Enemies.WORM_BOSS;
 import static helps.Constants.Enemies.getSpeed;
 import static helps.Constants.Enemies.getStartHealth;
 import static helps.Constants.Enemies.Animations.DEATH;
@@ -16,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import helps.ImageLoader;
+import main.Game;
 
 public abstract class Enemy implements Serializable {
 
@@ -27,7 +31,7 @@ public abstract class Enemy implements Serializable {
 
 	protected float x, y, speed;
 
-	protected int id, enemyType;
+	protected int xOffset, yOffset, id, enemyType;
 	protected int health, maxHealth;
 	protected int direction = -1;
 	protected int animation;
@@ -39,15 +43,21 @@ public abstract class Enemy implements Serializable {
 
 	public Enemy(ArrayList<Point> path, int id, int enemyType, EnemyHandler enemyHandler) {
 
+		this.enemyType = enemyType;
 		if (path != null) {
 			this.path = initPath(path);
 			this.x = (float) path.get(0).getX() * TILE_SIZE;
 			this.y = (float) path.get(0).getY() * TILE_SIZE;
 		}
 		this.id = id;
-		this.enemyType = enemyType;
 		this.enemyHandler = enemyHandler;
-		this.bounds = new Rectangle((int) x, (int) y, 32, 32);
+
+		int width = ImageLoader.getEnemySprites(enemyType, RIGHT)[0][0].getWidth();
+		int height = ImageLoader.getEnemySprites(enemyType, RIGHT)[0][0].getHeight();
+		this.xOffset = width - TILE_SIZE;
+		this.yOffset = height - TILE_SIZE;
+		this.bounds = new Rectangle((int) x - xOffset, (int) y - yOffset, width, height);
+
 		this.health = getStartHealth(enemyType);
 		this.maxHealth = health;
 		this.speed = getSpeed(enemyType);
@@ -58,6 +68,15 @@ public abstract class Enemy implements Serializable {
 
 		ArrayList<Point> newPath = new ArrayList<Point>();
 		newPath.addAll(path);
+
+		// Add extra off-screen point to end of path for boss type enemies.
+		if (enemyType == CROW_BOSS || enemyType == MOLD_BOSS || enemyType == WORM_BOSS) {
+			if (path.get(path.size() - 1).x == Game.GRID_WIDTH)
+				newPath.add(new Point(Game.GRID_WIDTH + 1, path.get(path.size() - 1).y));
+			else if (path.get(path.size() - 1).y == Game.GRID_HEIGHT)
+				newPath.add(new Point(path.get(path.size() - 1).x, Game.GRID_HEIGHT + 1));
+		}
+
 		return newPath;
 
 	}
@@ -98,7 +117,11 @@ public abstract class Enemy implements Serializable {
 		alive = false;
 		dying = false;
 		health = 0;
-		enemyHandler.getPlay().hurtPlayer();
+
+		int hurtAmount = 1;
+		if (enemyType == CROW_BOSS || enemyType == MOLD_BOSS || enemyType == WORM_BOSS)
+			hurtAmount = 3;
+		enemyHandler.getPlay().hurtPlayer(hurtAmount);
 
 	}
 
@@ -176,8 +199,8 @@ public abstract class Enemy implements Serializable {
 
 	private void updateHitbox() {
 
-		this.bounds.x = (int) x;
-		this.bounds.y = (int) y;
+		this.bounds.x = (int) x - xOffset;
+		this.bounds.y = (int) y - yOffset;
 
 	}
 

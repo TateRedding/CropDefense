@@ -1,12 +1,15 @@
 package gamestates;
 
-import static helps.Constants.Buttons.BLUE;
-import static helps.Constants.Buttons.TEXT_LARGE;
-
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -17,44 +20,91 @@ import helps.LoadSave;
 import main.Game;
 import objects.Map;
 import ui.MapButton;
-import ui.TextButton;
 
-public abstract class MapSelect extends State implements StateMethods {
+public abstract class MapSelect extends FileSelect {
 
 	protected MapHandler mapHandler;
-	protected TextButton menu;
 	protected ArrayList<MapButton> buttons = new ArrayList<>();
+	protected String[] mapNames;
 
-	protected MapSelect(Game game) {
+	public MapSelect(Game game) {
 
 		super(game);
-		this.mapHandler = game.getMapHandler();
-		initButtons();
+		mapHandler = game.getMapHandler();
 
 	}
 
-	protected void initButtons() {
-		menu = new TextButton(TEXT_LARGE, "Main Menu", BLUE, 10, 10);
-	}
-
-	@Override
 	public void update() {
 
-		menu.update();
+		super.update();
 		for (MapButton b : buttons)
 			b.update();
 
 	}
 
-	@Override
 	public void render(Graphics g) {
 
-		g.drawImage(ImageLoader.background, 0, 0, ImageLoader.background.getWidth(), ImageLoader.background.getHeight(),
-				null);
-
-		menu.draw(g);
+		super.render(g);
 		for (MapButton b : buttons)
 			b.draw(g);
+
+		if (selectedFile != null)
+			drawLastSavedInformation(g);
+
+		drawMapNames(g);
+
+	}
+
+	private void drawMapNames(Graphics g) {
+
+		g.setColor(Color.BLACK);
+		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
+
+		ArrayList<File> mapFiles = mapHandler.getMapFiles();
+		for (int i = 0; i < mapFiles.size(); i++) {
+
+			int xStart = (buttons.get(i).getBounds().x + buttons.get(i).getBounds().width / 2)
+					- ImageLoader.mapNameBG.getWidth() / 2;
+			int yStart = buttons.get(i).getBounds().y - ImageLoader.mapNameBG.getHeight();
+			g.drawImage(ImageLoader.mapNameBG, xStart, yStart, null);
+
+			xStart = (buttons.get(i).getBounds().x + buttons.get(i).getBounds().width / 2)
+					- g.getFontMetrics().stringWidth(mapNames[i]) / 2;
+			yStart += ImageLoader.mapNameBG.getHeight() / 2 + g.getFontMetrics().getHeight() / 4;
+			g.drawString(mapNames[i], xStart, yStart);
+
+		}
+
+	}
+
+	private void drawLastSavedInformation(Graphics g) {
+
+		Path filePath = Paths.get(selectedFile.getAbsolutePath());
+		BasicFileAttributes attr = null;
+		try {
+			attr = Files.readAttributes(filePath, BasicFileAttributes.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		int xStart = Game.SCREEN_WIDTH / 4 - ImageLoader.textBGSmall.getWidth() / 2 + 10;
+		int yStart = Game.SCREEN_HEIGHT / 2 - 2;
+
+		String creationTime = "" + attr.creationTime();
+		String month = creationTime.substring(5, 7);
+		String day = creationTime.substring(8, 10);
+		String year = creationTime.substring(0, 4);
+		String saveName = "Selected map: " + selectedFile.getName().substring(0,
+				selectedFile.getName().length() - LoadSave.saveFileExtension.length());
+		String lastSaved = "Last saved on: " + month + "/" + day + "/" + year;
+
+		g.setColor(Color.BLACK);
+		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
+
+		g.drawString(saveName, xStart, yStart);
+
+		yStart += g.getFontMetrics().getHeight() / 5 * 4;
+		g.drawString(lastSaved, xStart, yStart);
 
 	}
 
@@ -77,45 +127,35 @@ public abstract class MapSelect extends State implements StateMethods {
 
 	}
 
-	@Override
-	public void mouseClicked(int x, int y) {
+	protected void deleteSelectedFile() {
+
+		String fileName = selectedFile.getName();
+		File thumbnail = new File(LoadSave.mapPath + File.separator
+				+ fileName.substring(0, fileName.length() - LoadSave.mapFileExtension.length()) + "_thumbnail.png");
+		thumbnail.delete();
+		selectedFile.delete();
+		mapHandler.loadMaps();
+		game.getEditMap().initMapButtons();
+		game.getPlayNewGame().initMapButtons();
+		selectedFile = null;
+		deleting = false;
 
 	}
 
-	@Override
 	public void mousePressed(int x, int y) {
 
-		if (menu.getBounds().contains(x, y))
-			menu.setMousePressed(true);
-		else
-			for (MapButton b : buttons)
-				if (b.getBounds().contains(x, y))
-					b.setMousePressed(true);
+		super.mousePressed(x, y);
+		for (MapButton b : buttons)
+			if (b.getBounds().contains(x, y))
+				b.setMousePressed(true);
 
 	}
 
-	@Override
 	public void mouseReleased(int x, int y) {
 
-		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
-			GameStates.setGameState(GameStates.MENU);
-			if (game.getEditMap() != null)
-				game.getEditMap().initMapButtons();
-			else if (game.getPlayNewGame() != null)
-				game.getPlayNewGame().initMapButtons();
-		}
-
-		menu.setMousePressed(false);
-
-	}
-
-	@Override
-	public void mouseDragged(int x, int y) {
-
-	}
-
-	@Override
-	public void mouseMoved(int x, int y) {
+		super.mouseReleased(x, y);
+		for (MapButton b : buttons)
+			b.setMousePressed(false);
 
 	}
 

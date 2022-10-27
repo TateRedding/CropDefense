@@ -12,8 +12,11 @@ import static helps.Constants.Crops.CORN;
 import static helps.Constants.Crops.TOMATO;
 import static helps.Constants.Directions.LEFT;
 import static helps.Constants.Enemies.CROW;
+import static helps.Constants.Enemies.CROW_BOSS;
 import static helps.Constants.Enemies.MOLD;
+import static helps.Constants.Enemies.MOLD_BOSS;
 import static helps.Constants.Enemies.WORM;
+import static helps.Constants.Enemies.WORM_BOSS;
 import static helps.Constants.Enemies.Animations.DEATH;
 import static helps.Constants.Enemies.Animations.MOVE;
 import static helps.Constants.Tiles.GRASS;
@@ -48,12 +51,16 @@ import objects.Tile;
 public class ImageLoader {
 
 	public static ArrayList<ArrayList<BufferedImage>> tileSprites;
-	public static BufferedImage background, credits, creditsBG, cropDisplayBG, heart, newMapThumbnail, missingThumbnail,
-			overlayBG, seedPacket, seeds, textBGLarge, textBGSmall, uiBGBeige, uiBGBlue;
+	public static BufferedImage background, credits, creditsBG, cropDisplayBG, heart, newMapThumbnail, mapNameBG,
+			missingThumbnail, overlayBG, seedPacket, seeds, textBGLarge, textBGSmall, uiBGBeige, uiBGBlue;
+
 	public static BufferedImage[] bellPepperSprites, chiliSprites, cornSprites, pathPointSprites, tomatoSprites,
 			tutorialEdit, tutorialPlay, waterFrames;
-	public static BufferedImage[][] crowSprites, crowSpritesLeft, moldSprites, moldSpritesLeft, mapButtons,
-			projectileSprites, squareButtons, textButtonsLarge, textButtonsSmall, wormSprites, wormSpritesLeft;
+
+	public static BufferedImage[][] mapButtons, projectileSprites, squareButtons, textButtonsLarge, textButtonsSmall;
+	public static BufferedImage[][] crowSprites, crowSpritesLeft, crowBossSprites, crowBossSpritesLeft, moldSprites,
+			moldSpritesLeft, moldBossSprites, moldBossSpritesLeft, wormSprites, wormSpritesLeft, wormBossSprites,
+			wormBossSpritesLeft;
 
 	public static void loadImages() {
 
@@ -155,6 +162,7 @@ public class ImageLoader {
 		cropDisplayBG = LoadSave.loadImage(LoadSave.CROP_DISPLAY_BG);
 		credits = LoadSave.loadImage(LoadSave.CREDITS);
 		creditsBG = LoadSave.loadImage(LoadSave.CREDITS_BG);
+		mapNameBG = LoadSave.loadImage(LoadSave.MAP_NAME_BG);
 		overlayBG = LoadSave.loadImage(LoadSave.OVERLAY_BG);
 		textBGLarge = LoadSave.loadImage(LoadSave.TEXT_BG_LARGE);
 		textBGSmall = LoadSave.loadImage(LoadSave.TEXT_BG_SMALL);
@@ -206,10 +214,18 @@ public class ImageLoader {
 
 		crowSprites = new BufferedImage[2][4];
 		crowSpritesLeft = new BufferedImage[2][4];
+		crowBossSprites = new BufferedImage[2][4];
+		crowBossSpritesLeft = new BufferedImage[2][4];
+
 		moldSprites = new BufferedImage[2][4];
 		moldSpritesLeft = new BufferedImage[2][4];
+		moldBossSprites = new BufferedImage[2][4];
+		moldBossSpritesLeft = new BufferedImage[2][4];
+
 		wormSprites = new BufferedImage[2][4];
 		wormSpritesLeft = new BufferedImage[2][4];
+		wormBossSprites = new BufferedImage[2][4];
+		wormBossSpritesLeft = new BufferedImage[2][4];
 
 		BufferedImage atlas = LoadSave.loadImage(LoadSave.CROW_SPRITES);
 		int spriteSize = 32;
@@ -218,6 +234,8 @@ public class ImageLoader {
 			for (int j = 0; j < crowSprites.length; j++) {
 				crowSprites[j][i] = getSprite(atlas, i, j, spriteSize);
 				crowSpritesLeft[j][i] = flipImageYAxis(crowSprites[j][i]);
+				crowBossSprites[j][i] = resize(crowSprites[j][i], 2);
+				crowBossSpritesLeft[j][i] = flipImageYAxis(crowBossSprites[j][i]);
 			}
 
 		atlas = LoadSave.loadImage(LoadSave.MOLD_SPRITES);
@@ -226,6 +244,8 @@ public class ImageLoader {
 			for (int j = 0; j < moldSprites.length; j++) {
 				moldSprites[j][i] = getSprite(atlas, i, j, spriteSize);
 				moldSpritesLeft[j][i] = flipImageYAxis(moldSprites[j][i]);
+				moldBossSprites[j][i] = resize(moldSprites[j][i], 2);
+				moldBossSpritesLeft[j][i] = flipImageYAxis(moldBossSprites[j][i]);
 			}
 
 		atlas = LoadSave.loadImage(LoadSave.WORM_SPRITES);
@@ -234,6 +254,8 @@ public class ImageLoader {
 			for (int j = 0; j < wormSprites.length; j++) {
 				wormSprites[j][i] = getSprite(atlas, i, j, spriteSize);
 				wormSpritesLeft[j][i] = flipImageYAxis(wormSprites[j][i]);
+				wormBossSprites[j][i] = resize(wormSprites[j][i], 2);
+				wormBossSpritesLeft[j][i] = flipImageYAxis(wormBossSprites[j][i]);
 			}
 
 	}
@@ -394,6 +416,22 @@ public class ImageLoader {
 		return atlas.getSubimage(x * spriteSize, y * spriteSize, spriteSize, spriteSize);
 	}
 
+	private static BufferedImage resize(BufferedImage base, int proportion) {
+
+		int w = base.getWidth() * proportion;
+		int h = base.getHeight() * proportion;
+
+		BufferedImage newImg = new BufferedImage(w, h, base.getType());
+
+		Graphics g = newImg.createGraphics();
+
+		g.drawImage(base, 0, 0, w, h, null);
+		g.dispose();
+
+		return newImg;
+
+	}
+
 	private static BufferedImage buildImage(BufferedImage base, BufferedImage top) {
 
 		int w = base.getWidth();
@@ -485,16 +523,31 @@ public class ImageLoader {
 				return crowSpritesLeft;
 			else
 				return crowSprites;
+		case CROW_BOSS:
+			if (direction == LEFT)
+				return crowBossSpritesLeft;
+			else
+				return crowBossSprites;
 		case MOLD:
 			if (direction == LEFT)
 				return moldSpritesLeft;
 			else
 				return moldSprites;
+		case MOLD_BOSS:
+			if (direction == LEFT)
+				return moldBossSpritesLeft;
+			else
+				return moldBossSprites;
 		case WORM:
 			if (direction == LEFT)
 				return wormSpritesLeft;
 			else
 				return wormSprites;
+		case WORM_BOSS:
+			if (direction == LEFT)
+				return wormBossSpritesLeft;
+			else
+				return wormBossSprites;
 		}
 
 		return null;
@@ -509,16 +562,31 @@ public class ImageLoader {
 				return crowSprites[MOVE].length;
 			else if (animation == DEATH)
 				return crowSprites[DEATH].length;
+		case CROW_BOSS:
+			if (animation == MOVE)
+				return crowBossSprites[MOVE].length;
+			else if (animation == DEATH)
+				return crowBossSprites[DEATH].length;
 		case MOLD:
 			if (animation == MOVE)
 				return moldSprites[MOVE].length;
 			else if (animation == DEATH)
 				return moldSprites[DEATH].length;
+		case MOLD_BOSS:
+			if (animation == MOVE)
+				return moldBossSprites[MOVE].length;
+			else if (animation == DEATH)
+				return moldBossSprites[DEATH].length;
 		case WORM:
 			if (animation == MOVE)
 				return wormSprites[MOVE].length;
 			else if (animation == DEATH)
 				return wormSprites[DEATH].length;
+		case WORM_BOSS:
+			if (animation == MOVE)
+				return wormBossSprites[MOVE].length;
+			else if (animation == DEATH)
+				return wormBossSprites[DEATH].length;
 		}
 
 		return 0;

@@ -9,7 +9,7 @@ import objects.Map;
 public class MapHandler {
 
 	private ArrayList<Map> maps = new ArrayList<>();
-	private File[] mapFiles;
+	private ArrayList<File> mapFiles = new ArrayList<>();
 
 	private int animationIndex, tick;
 	private int animationSpeed = 18;
@@ -23,14 +23,17 @@ public class MapHandler {
 	public void loadMaps() {
 
 		maps.clear();
+		mapFiles.clear();
 
 		File mapFolder = new File(LoadSave.mapPath);
-		mapFiles = mapFolder.listFiles();
+		File[] files = mapFolder.listFiles();
 
-		if (mapFiles != null)
-			for (File mapFile : mapFiles)
-				if (mapFile.getPath().endsWith(LoadSave.mapFileExtension))
-					maps.add(LoadSave.loadMap(mapFile));
+		if (files != null)
+			for (File file : files)
+				if (file.getPath().endsWith(LoadSave.mapFileExtension)) {
+					mapFiles.add(file);
+					maps.add(LoadSave.loadMap(file));
+				}
 
 	}
 
@@ -54,7 +57,7 @@ public class MapHandler {
 		return maps;
 	}
 
-	public File[] getMapFiles() {
+	public ArrayList<File> getMapFiles() {
 		return mapFiles;
 	}
 

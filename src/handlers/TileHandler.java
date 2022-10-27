@@ -36,18 +36,18 @@ public class TileHandler {
 				Tile currTile = tileData[y][x];
 				if (currTile.getTileType() == WATER) {
 					g.drawImage(ImageLoader.waterFrames[game.getMapHandler().getAnimationIndex()], x * Game.TILE_SIZE,
-							y * Game.TILE_SIZE, Game.TILE_SIZE, Game.TILE_SIZE, null);
+							y * Game.TILE_SIZE, null);
 					if (currTile.getBinaryId() != 255) {
 						int index = binaryMap.get(currTile.getBinaryId());
 						g.drawImage(ImageLoader.tileSprites.get(WATER).get(index), x * Game.TILE_SIZE,
-								y * Game.TILE_SIZE, Game.TILE_SIZE, Game.TILE_SIZE, null);
+								y * Game.TILE_SIZE, null);
 					}
 				} else {
 					if (currTile.getTileType() == ROAD)
 						g.drawImage(ImageLoader.tileSprites.get(GRASS).get(0), x * Game.TILE_SIZE, y * Game.TILE_SIZE,
-								Game.TILE_SIZE, Game.TILE_SIZE, null);
+								null);
 					g.drawImage(ImageLoader.tileSprites.get(currTile.getTileType()).get(currTile.getBinaryId()),
-							x * Game.TILE_SIZE, y * Game.TILE_SIZE, Game.TILE_SIZE, Game.TILE_SIZE, null);
+							x * Game.TILE_SIZE, y * Game.TILE_SIZE, null);
 				}
 			}
 
