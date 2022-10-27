@@ -12,7 +12,7 @@ public class UIBar {
 	public static final int UI_WIDTH = SCREEN_WIDTH;
 	public static final int UI_HEIGHT = 160;
 	
-	private Rectangle bounds;
+	protected Rectangle bounds;
 
 	public UIBar() {
 		bounds = new Rectangle(X, Y, UI_WIDTH, UI_HEIGHT);
