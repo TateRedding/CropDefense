@@ -6,18 +6,10 @@ import static helps.Constants.Buttons.getButtonHeight;
 import static helps.Constants.Buttons.getButtonWidth;
 import static ui.UIBar.UI_HEIGHT;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
 import ui.TextButton;
@@ -81,40 +73,6 @@ public abstract class SaveSelect extends FileSelect {
 		for (TextButton b : buttons)
 			b.draw(g);
 
-		if (selectedFile != null)
-			drawLastPlayedInformation(g);
-
-	}
-
-	private void drawLastPlayedInformation(Graphics g) {
-
-		Path filePath = Paths.get(selectedFile.getAbsolutePath());
-		BasicFileAttributes attr = null;
-		try {
-			attr = Files.readAttributes(filePath, BasicFileAttributes.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		int xStart = Game.SCREEN_WIDTH / 4 - ImageLoader.textBGSmall.getWidth() / 2 + 10;
-		int yStart = Game.SCREEN_HEIGHT / 2 - 2;
-
-		String creationTime = "" + attr.creationTime();
-		String month = creationTime.substring(5, 7);
-		String day = creationTime.substring(8, 10);
-		String year = creationTime.substring(0, 4);
-		String saveName = "Selected game: " + selectedFile.getName().substring(0,
-				selectedFile.getName().length() - LoadSave.saveFileExtension.length());
-		String lastSaved = "Last saved on: " + month + "/" + day + "/" + year;
-
-		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
-
-		g.drawString(saveName, xStart, yStart);
-
-		yStart += g.getFontMetrics().getHeight() / 5 * 4;
-		g.drawString(lastSaved, xStart, yStart);
-
 	}
 
 	public void mousePressed(int x, int y) {
@@ -130,7 +88,20 @@ public abstract class SaveSelect extends FileSelect {
 
 		super.mouseReleased(x, y);
 		for (TextButton b : buttons)
-			b.setMousePressed(false);
+			b.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		super.mouseMoved(x, y);
+
+		for (TextButton b : buttons)
+			b.setMouseOver(false);
+
+		for (TextButton b : buttons)
+			if (b.getBounds().contains(x, y))
+				b.setMouseOver(true);
 
 	}
 

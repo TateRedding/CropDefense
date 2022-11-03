@@ -1,18 +1,20 @@
-Version 0.0.1
+Version 0.1.1
 
-Save files for games are no longer created as soon as a new game is started.
-Save files are now only created if a player chooses to save their game after the game has begun.
-This way, a player can play a game from start to finish and not have to take up a save slot in doing so.
+Major code cleaning and organization (Thank you, Kaarin Gaming! https://www.youtube.com/watch?v=GFJBmIF82UU&ab_channel=KaarinGaming)
 
-Minor changes to texts when starting a new game or selecting a file to either load or delete.
-Added some background images behind these text for easier readability.
+The game now displays a message if the game is paused.
 
-Credits are now two separate images, one for the background, one for the text.
+Chilis now shoot in a cone rather than a direct straight line.
 
-Some very minor balancing and bug fixes.
+Buttons now react when hovered over by the mouse.
 
-Added a few comments to the code.
+Added a custom font to avoid rendering issues on different operating systems.
 
+Added tooltips for crops explaining what each crop does.
+
+Credits are now back to being generated programmatically, as it is much easier to add future changes this way.
+
+Tutorials are now two separate classes and the text in them is also generated programmatically.
 
 
 Version 0.1
@@ -43,3 +45,20 @@ Fixed bug where the save game screen would not warn a user that the game is not 
 Fixed bug where projectiles were calculating their trajectory based on the top right corner of the crop, though they originate from the middle.
 
 Further organization and abstraction of codebase
+
+
+
+Version 0.0.1
+
+Save files for games are no longer created as soon as a new game is started.
+Save files are now only created if a player chooses to save their game after the game has begun.
+This way, a player can play a game from start to finish and not have to take up a save slot in doing so.
+
+Minor changes to texts when starting a new game or selecting a file to either load or delete.
+Added some background images behind these text for easier readability.
+
+Credits are now two separate images, one for the background, one for the text.
+
+Some very minor balancing and bug fixes.
+
+Added a few comments to the code.

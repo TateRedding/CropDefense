@@ -22,11 +22,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import crops.Crop;
-import enemies.Enemy;
+import entities.Crop;
+import entities.Enemy;
 import gamestates.GameStates;
 import gamestates.Play;
+import helps.DrawText;
 import helps.ImageLoader;
+import helps.LoadSave;
 import main.Game;
 
 public class ActionBar extends UIBar {
@@ -43,6 +45,11 @@ public class ActionBar extends UIBar {
 	private int displayXStart = Game.SCREEN_WIDTH - ImageLoader.cropDisplayBG.getWidth() - 14;
 	private int displayYStart = Y + 10;
 	private int[] cropOrder = { CORN, TOMATO, CHILI, BELL_PEPPER };
+
+	private int selectedCropXStart = displayXStart + 18;
+	private int selectedCropYStart = displayYStart + 10;
+	private int selectedCropAreaWidth = 72;
+	private int selectedCropAreaHeight = 72;
 
 	public ActionBar(Play play) {
 
@@ -63,28 +70,35 @@ public class ActionBar extends UIBar {
 
 		mainButtons.addAll(Arrays.asList(menu, pause, save));
 
-		int xOffset = 5;
+		int xOffset = 15;
 		int totalButtonWidth = getButtonWidth(SQUARE) * 4 + xOffset * 3;
 		int menuEndX = menu.getBounds().x + menu.getBounds().width;
 		xStart = menuEndX + (displayXStart - menuEndX) / 2 - totalButtonWidth / 2;
 		yStart = Game.SCREEN_HEIGHT + (UI_HEIGHT / 2 - getButtonHeight(SQUARE) / 2);
 
-		corn = new CropButton(BLUE, xStart, yStart, ImageLoader.getCropSprites(CORN)[0], CORN);
+		corn = new CropButton(BLUE, xStart, yStart, ImageLoader.getCropSprites(CORN)[0], CORN, this);
 		tomato = new CropButton(BLUE, xStart += getButtonWidth(SQUARE) + xOffset, yStart,
-				ImageLoader.getCropSprites(TOMATO)[0], TOMATO);
+				ImageLoader.getCropSprites(TOMATO)[0], TOMATO, this);
 		chili = new CropButton(BLUE, xStart += getButtonWidth(SQUARE) + xOffset, yStart,
-				ImageLoader.getCropSprites(CHILI)[0], CHILI);
+				ImageLoader.getCropSprites(CHILI)[0], CHILI, this);
 		bellPepper = new CropButton(BLUE, xStart += getButtonWidth(SQUARE) + xOffset, yStart,
-				ImageLoader.getCropSprites(BELL_PEPPER)[0], BELL_PEPPER);
+				ImageLoader.getCropSprites(BELL_PEPPER)[0], BELL_PEPPER, this);
 
 		cropButtons.addAll(Arrays.asList(corn, tomato, chili, bellPepper));
 
-		xStart = displayXStart + ImageLoader.cropDisplayBG.getWidth() - getButtonWidth(TEXT_SMALL) - 6;
-		yStart = displayYStart + 10;
+		int selectedCropYEnd = (selectedCropYStart + selectedCropAreaHeight);
+		yStart = selectedCropYEnd + (displayYStart + ImageLoader.cropDisplayBG.getHeight() - selectedCropYEnd) / 2
+				- getButtonHeight(TEXT_SMALL) / 2;
 
-		harvest = new TextButton(TEXT_SMALL, "Harvest", BEIGE, xStart, yStart);
-		upgradeDamage = new TextButton(TEXT_SMALL, "Upgrade", BEIGE, xStart, yStart += 31);
-		upgradeRange = new TextButton(TEXT_SMALL, "Upgrade", BEIGE, xStart, yStart += 25);
+		harvest = new TextButton(TEXT_SMALL, "Harvest", BEIGE, displayXStart + 6, yStart);
+
+		int displayBoxXEnd = selectedCropXStart + selectedCropAreaWidth;
+		int areaWidth = (displayXStart + ImageLoader.cropDisplayBG.getWidth() - displayBoxXEnd) / 2;
+
+		xStart = displayBoxXEnd + areaWidth / 2 - getButtonWidth(TEXT_SMALL) / 2;
+		yStart = selectedCropYStart + selectedCropAreaHeight - 12;
+		upgradeDamage = new TextButton(TEXT_SMALL, "Upgrade", BEIGE, xStart, yStart);
+		upgradeRange = new TextButton(TEXT_SMALL, "Upgrade", BEIGE, xStart + areaWidth, yStart);
 
 	}
 
@@ -116,8 +130,12 @@ public class ActionBar extends UIBar {
 		for (TextButton mb : mainButtons)
 			mb.draw(g);
 
-		for (CropButton cb : cropButtons)
+		for (CropButton cb : cropButtons) {
 			cb.draw(g);
+			if (cb.isMouseOver())
+				play.drawCropToolTip(g, cb.getCropType());
+
+		}
 
 		drawButtonOverlays(g);
 
@@ -157,7 +175,7 @@ public class ActionBar extends UIBar {
 	private void drawLabels(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.PLAIN, 15));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(24f));
 
 		int yStart = corn.getBounds().y - 6;
 
@@ -173,16 +191,18 @@ public class ActionBar extends UIBar {
 	private void drawCropPrices(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 12));
+		g.setFont(LoadSave.gameFont.deriveFont(16f));
 
 		for (int i = 0; i < cropButtons.size(); i++) {
+
 			String cost = "" + getCropCost(cropOrder[i]);
 			int xOffset = getButtonWidth(SQUARE) / 2 - ImageLoader.seeds.getWidth() / 2
 					- g.getFontMetrics().stringWidth(cost) / 2 - 3;
 			int x = cropButtons.get(i).getBounds().x + xOffset;
 			int y = cropButtons.get(i).getBounds().y + cropButtons.get(i).getBounds().height + 3;
 			g.drawImage(ImageLoader.seeds, x, y, null);
-			g.drawString(cost, x + ImageLoader.seeds.getWidth() + 6, y + ImageLoader.seeds.getHeight() / 4 * 3);
+			DrawText.drawTextCenteredRightAlign(g, cost, x + ImageLoader.seeds.getWidth() + 6, y,
+					ImageLoader.seeds.getHeight());
 
 		}
 
@@ -197,32 +217,44 @@ public class ActionBar extends UIBar {
 
 			// Selected Crop
 			BufferedImage sprite = ImageLoader.getCropSprites(selectedCrop.getCropType())[selectedCrop.getColorIndex()];
-			g.drawImage(sprite, displayXStart + 10, displayYStart + 14, sprite.getWidth() * 2, sprite.getHeight() * 2,
-					null);
+
+			g.drawImage(sprite, selectedCropXStart + 4, selectedCropYStart + 4, sprite.getWidth() * 2,
+					sprite.getHeight() * 2, null);
 
 			// Crop Stats
-			int xStart = displayXStart + 82;
-			int yStart = displayYStart + 21;
-			int yOffset = 20;
-			g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 15));
-			g.drawString("" + getCropName(selectedCrop.getCropType()), xStart, yStart);
-			g.drawString("ID: " + selectedCrop.getId(), xStart, yStart += yOffset);
-			g.drawString("Damage: " + (int) selectedCrop.getDamage(), xStart, yStart += yOffset);
-			float range = Math.round(selectedCrop.getRange() / Game.TILE_SIZE * 100) / 100.0f;
-			g.drawString("Range: " + range, xStart, yStart += yOffset);
+			int displayBoxXEnd = selectedCropXStart + selectedCropAreaWidth;
+			int areaWidth = (displayXStart + ImageLoader.cropDisplayBG.getWidth() - displayBoxXEnd) / 2;
+			int areaHeight = selectedCropAreaHeight - 12;
+			;
+
+			g.setColor(Color.BLACK);
+			g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(24f));
+
+			String damageTier = "Tier: " + selectedCrop.getDamageTier() + "/3";
+			String damageStr = "" + (int) selectedCrop.getDamage();
+			String[] damageLines = new String[] { "Damage", damageTier, damageStr };
+			DrawText.drawTextCentered(g, damageLines, 5, displayBoxXEnd, selectedCropYStart, areaWidth, areaHeight);
+
+			String rangeTier = "Tier: " + selectedCrop.getRangeTier() + "/3";
+			String rangeStr = "" + Math.round(selectedCrop.getRange() / Game.TILE_SIZE * 100) / 100.0f;
+			String[] rangeLines = new String[] { "Range", rangeTier, rangeStr };
+			DrawText.drawTextCentered(g, rangeLines, 5, displayBoxXEnd + areaWidth, selectedCropYStart, areaWidth,
+					areaHeight);
 
 			// Price Messages
-			xStart = displayXStart + 6;
-			yStart = displayYStart + ImageLoader.cropDisplayBG.getHeight() - 21;
+			g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(20f));
+			int xStart = harvest.getBounds().x + harvest.getBounds().width;
+			int yStart = harvest.getBounds().y;
+			int height = harvest.getBounds().height;
+			int width = displayXStart + ImageLoader.cropDisplayBG.getWidth() - xStart;
 			if (harvest.isMouseOver()) {
-				g.setColor(Color.red);
-				g.drawString("Sell for: " + selectedCrop.getHarvestAmount() + " seeds", xStart, yStart);
-			} else if (upgradeDamage.isMouseOver()) {
-				g.setColor(Color.blue);
-				g.drawString("Increase Damage for: " + selectedCrop.getUpgradeCost() + " seeds", xStart, yStart);
-			} else if (upgradeRange.isMouseOver()) {
-				g.setColor(Color.blue);
-				g.drawString("Increase Range for: " + selectedCrop.getUpgradeCost() + " seeds", xStart, yStart);
+				g.setColor(Color.RED);
+				DrawText.drawTextCentered(g, "Sell for: " + selectedCrop.getHarvestAmount() + " seeds", xStart, yStart,
+						width, height);
+			} else if (upgradeDamage.isMouseOver() || upgradeRange.isMouseOver()) {
+				g.setColor(Color.BLUE);
+				DrawText.drawTextCentered(g, "Upgrade cost: " + selectedCrop.getUpgradeCost() + " seeds", xStart,
+						yStart, width, height);
 			}
 		}
 
@@ -231,7 +263,7 @@ public class ActionBar extends UIBar {
 	private void drawPlayerInformation(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(24f));
 
 		String seeds = "" + play.getSeeds();
 		String lives = "" + play.getLives();
@@ -247,30 +279,31 @@ public class ActionBar extends UIBar {
 		int y = Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT / 2 - height - yOffset / 2;
 
 		g.drawImage(ImageLoader.seedPacket, x, y, null);
-		g.drawString(seeds, x + width + xOffset, y + height / 4 * 3);
-		g.drawImage(ImageLoader.heart, x, y += height + yOffset, null);
-		g.drawString(lives, x + width + xOffset, y + height / 4 * 3);
+		DrawText.drawTextCenteredRightAlign(g, seeds, x + width + xOffset, y, height);
+
+		y += height + yOffset;
+		g.drawImage(ImageLoader.heart, x, y, null);
+		DrawText.drawTextCenteredRightAlign(g, lives, x + width + xOffset, y, height);
 
 	}
 
 	private void drawWaveInformation(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(24f));
 
-		int pepperEndX = bellPepper.getBounds().x + bellPepper.getBounds().width;
-		int x = pepperEndX + (displayXStart - pepperEndX) / 2 - (g.getFontMetrics().stringWidth("Wave 55/55")) / 2;
-		int y = Game.SCREEN_HEIGHT + UI_HEIGHT / 2;
-
-		g.drawString("Wave " + play.getCurrentWave() + "/" + play.getTotalWaves(), x, y);
-
-		y += g.getFontMetrics().getHeight();
 		int enemies = 0;
 		for (Enemy e : play.getEnemyHandler().getEnemies())
 			if (e.isAlive())
 				enemies++;
 
-		g.drawString("Enemies: " + enemies, x, y);
+		String waveInfo = "Wave " + play.getCurrentWave() + "/" + play.getTotalWaves();
+		String enemyInfo = "Enemies: " + enemies;
+		String[] lines = new String[] { waveInfo, enemyInfo };
+
+		int xStart = bellPepper.getBounds().x + bellPepper.getBounds().width + 15;
+
+		DrawText.drawTextCenteredRightAlign(g, lines, 5, xStart, Game.SCREEN_HEIGHT, UI_HEIGHT);
 
 	}
 
@@ -281,7 +314,7 @@ public class ActionBar extends UIBar {
 				mb.setMousePressed(true);
 
 		for (CropButton cb : cropButtons)
-			if (cb.getBounds().contains(x, y))
+			if (cb.getBounds().contains(x, y) && getCropCost(cb.getCropType()) <= play.getSeeds())
 				cb.setMousePressed(true);
 
 		if (selectedCrop != null) {
@@ -303,7 +336,9 @@ public class ActionBar extends UIBar {
 			if (play.isUnsavedChanges()) {
 				play.setPaused(true);
 				play.setUnsavedOverlayActive(true);
-				play.setUnsavedChangesOverlay(new UnsavedChangesOverlay(play, UnsavedChangesOverlay.EXIT_TO_MENU));
+				int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
+				play.setUnsavedChangesOverlay(
+						new UnsavedChangesOverlay(play, UnsavedChangesOverlay.EXIT_TO_MENU, yStart));
 			} else {
 				GameStates.setGameState(GameStates.MENU);
 				play.getGame().getMapHandler().loadMaps();
@@ -334,23 +369,32 @@ public class ActionBar extends UIBar {
 		}
 
 		for (TextButton mb : mainButtons)
-			mb.setMousePressed(false);
+			mb.reset();
 		for (SquareButton cb : cropButtons)
-			cb.setMousePressed(false);
-		harvest.setMousePressed(false);
-		harvest.setMouseOver(false);
-		upgradeDamage.setMousePressed(false);
-		upgradeDamage.setMouseOver(false);
-		upgradeRange.setMousePressed(false);
-		upgradeRange.setMouseOver(false);
+			cb.reset();
+		harvest.reset();
+		upgradeDamage.reset();
+		upgradeRange.reset();
 
 	}
 
 	public void mouseMoved(int x, int y) {
 
+		for (TextButton mb : mainButtons)
+			mb.setMouseOver(false);
+		for (CropButton cb : cropButtons)
+			cb.setMouseOver(false);
 		harvest.setMouseOver(false);
 		upgradeDamage.setMouseOver(false);
 		upgradeRange.setMouseOver(false);
+
+		for (TextButton mb : mainButtons)
+			if (mb.getBounds().contains(x, y))
+				mb.setMouseOver(true);
+
+		for (CropButton cb : cropButtons)
+			if (cb.getBounds().contains(x, y))
+				cb.setMouseOver(true);
 
 		if (selectedCrop != null) {
 			if (harvest.getBounds().contains(x, y))
@@ -363,6 +407,10 @@ public class ActionBar extends UIBar {
 					upgradeRange.setMouseOver(true);
 		}
 
+	}
+
+	public Play getPlay() {
+		return play;
 	}
 
 	public TextButton getPause() {

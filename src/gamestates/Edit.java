@@ -180,7 +180,7 @@ public class Edit extends MapState implements StateMethods {
 	private void drawInvalidMapWarning(Graphics g) {
 
 		g.setColor(Color.RED);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 28));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(32f));
 		String text = "Map must contain at least one valid path from a start point to an end point!";
 
 		int x = Game.SCREEN_WIDTH / 2 - (g.getFontMetrics().stringWidth(text) / 2);
@@ -193,7 +193,7 @@ public class Edit extends MapState implements StateMethods {
 	private void drawSavedMessage(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 28));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(40f));
 
 		String text = "Map saved succesfully!";
 
@@ -430,44 +430,55 @@ public class Edit extends MapState implements StateMethods {
 
 	public void mousePressed(int x, int y) {
 
-		if (unsavedOverlayActive && unsavedChangesOverlay != null)
-			super.mousePressed(x, y);
-		else if (editorBar.getBounds().contains(x, y))
-			editorBar.mousePressed(x, y);
+		super.mousePressed(x, y);
+
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
+			if (editorBar.getBounds().contains(x, y))
+				editorBar.mousePressed(x, y);
 
 	}
 
 	public void mouseReleased(int x, int y) {
 
-		if (unsavedOverlayActive && unsavedChangesOverlay != null)
-			super.mouseReleased(x, y);
-		else if (editorBar.getBounds().contains(x, y))
-			editorBar.mouseReleased(x, y);
-		else if (selectedTileType != -1) {
-			changeTile(x, y);
-		} else if (selectedPointType != -1) {
-			if (isSpotValid(selectedPointType, x, y))
-				setPathPoint(selectedPointType, x, y);
-		} else if (getPathPointAt(x, y) != null) {
-			selectedPointType = getPathPointAt(x, y).getPointType();
-			getPathPointAt(x, y).setPoint(null);
-			int tileX = x / Game.TILE_SIZE;
-			int tileY = y / Game.TILE_SIZE;
-			int tileType = tileData[tileY][tileX].getTileType();
-			updateSprites(tileType, tileX, tileY);
-		}
+		super.mouseReleased(x, y);
+
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
+			if (editorBar.getBounds().contains(x, y))
+				editorBar.mouseReleased(x, y);
+			else if (selectedTileType != -1) {
+				changeTile(x, y);
+			} else if (selectedPointType != -1) {
+				if (isSpotValid(selectedPointType, x, y))
+					setPathPoint(selectedPointType, x, y);
+			} else if (getPathPointAt(x, y) != null) {
+				selectedPointType = getPathPointAt(x, y).getPointType();
+				getPathPointAt(x, y).setPoint(null);
+				int tileX = x / Game.TILE_SIZE;
+				int tileY = y / Game.TILE_SIZE;
+				int tileType = tileData[tileY][tileX].getTileType();
+				updateSprites(tileType, tileX, tileY);
+			}
 
 	}
 
 	public void mouseDragged(int x, int y) {
 
-		if (!unsavedOverlayActive) {
-
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null) {
 			super.mouseDragged(x, y);
 			if (selectedTileType != -1 && inGameArea)
 				changeTile(x, y);
 
 		}
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		super.mouseMoved(x, y);
+
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
+			if (editorBar.getBounds().contains(x, y))
+				editorBar.mouseMoved(x, y);
 
 	}
 

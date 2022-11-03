@@ -19,6 +19,7 @@ import objects.Map;
 import ui.MapButton;
 import ui.NameFileOverlay;
 import ui.TextButton;
+import ui.UIBar;
 
 public class EditMap extends MapSelect {
 
@@ -98,6 +99,14 @@ public class EditMap extends MapSelect {
 
 	}
 
+	protected void switchAndReset(GameStates gameState) {
+
+		super.switchAndReset(gameState);
+		nameFileOverlay = null;
+		namingFile = false;
+
+	}
+
 	public void mousePressed(int x, int y) {
 
 		super.mousePressed(x, y);
@@ -119,16 +128,11 @@ public class EditMap extends MapSelect {
 	public void mouseReleased(int x, int y) {
 
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
-			GameStates.setGameState(GameStates.MENU);
 			initMapButtons();
 			game.getPlayNewGame().initMapButtons();
-			nameFileOverlay = null;
-			namingFile = false;
-			deleting = false;
-			selectedFile = null;
+			switchAndReset(GameStates.MENU);
 		} else if (tutorial.getBounds().contains(x, y) && tutorial.isMousePressed()) {
-			game.setTutorial(new Tutorial(game, Tutorial.EDIT_TUTORIAL));
-			GameStates.setGameState(GameStates.TUTORIAL);
+			switchAndReset(GameStates.EDIT_TUTORIAL);
 		}
 
 		if (namingFile && nameFileOverlay != null)
@@ -137,9 +141,7 @@ public class EditMap extends MapSelect {
 			if (selectedFile != null) {
 				if (load.getBounds().contains(x, y) && load.isMousePressed()) {
 					game.editMap(LoadSave.loadMap(selectedFile));
-					selectedFile = null;
-					GameStates.setGameState(GameStates.EDIT);
-					deleting = false;
+					switchAndReset(GameStates.EDIT);
 				} else if (delete.getBounds().contains(x, y) && delete.isMousePressed())
 					deleting = true;
 				if (deleting) {
@@ -156,7 +158,8 @@ public class EditMap extends MapSelect {
 					if (mapHandler.getMaps().size() >= i + 1)
 						selectedFile = mapHandler.getMapFiles().get(i);
 					else {
-						this.nameFileOverlay = new NameFileOverlay(this);
+						int yStart = (Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT) / 2 - ImageLoader.overlayBG.getHeight() / 2;
+						this.nameFileOverlay = new NameFileOverlay(this, yStart);
 						namingFile = true;
 						selectedFile = null;
 					}
@@ -164,8 +167,29 @@ public class EditMap extends MapSelect {
 		}
 
 		super.mouseReleased(x, y);
-		tutorial.setMousePressed(false);
-		load.setMousePressed(false);
+		tutorial.reset();
+		load.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		tutorial.setMouseOver(false);
+		load.setMouseOver(false);
+
+		super.mouseMoved(x, y);
+
+		if (namingFile && nameFileOverlay != null)
+			nameFileOverlay.mouseMoved(x, y);
+		else {
+
+			if (tutorial.getBounds().contains(x, y))
+				tutorial.setMouseOver(true);
+			if (selectedFile != null)
+				if (load.getBounds().contains(x, y))
+					load.setMouseOver(true);
+
+		}
 
 	}
 

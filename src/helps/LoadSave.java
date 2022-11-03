@@ -2,6 +2,9 @@ package helps;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +27,6 @@ public class LoadSave {
 	public static final String BELL_PEPPER_SPRITES = "bell_pepper.png";
 	public static final String CHILI_SPRITES = "chili.png";
 	public static final String CORN_SPRITES = "corn.png";
-	public static final String CREDITS = "ui/credits.png";
 	public static final String CREDITS_BG = "ui/credits_bg.png";
 	public static final String CROP_DISPLAY_BG = "ui/crop_display_bg.png";
 	public static final String CROW_SPRITES = "crow.png";
@@ -37,6 +39,7 @@ public class LoadSave {
 	public static final String PROJECTILE_SPRITES = "projectiles.png";
 	public static final String SQUARE_BUTTONS = "ui/square_buttons.png";
 	public static final String TEXT_BG_LARGE = "ui/text_bg_large.png";
+	public static final String TEXT_BG_MED = "ui/text_bg_medium.png";
 	public static final String TEXT_BG_SMALL = "ui/text_bg_small.png";
 	public static final String TEXT_BUTTONS_LARGE = "ui/text_buttons_large.png";
 	public static final String TEXT_BUTTONS_SMALL = "ui/text_buttons_small.png";
@@ -54,6 +57,45 @@ public class LoadSave {
 	public static String saveFolder = "saves";
 	public static String saveFileExtension = ".save";
 	public static String savePath = homePath + File.separator + gameFolder + File.separator + saveFolder;
+
+	public static Font gameFont;
+	private static String fontName = "Kenney Pixel.ttf";
+
+	public static void createFolders() {
+
+		File folder = new File(homePath + File.separator + gameFolder);
+		if (!folder.exists())
+			folder.mkdir();
+
+		folder = new File(mapPath);
+		if (!folder.exists())
+			folder.mkdir();
+
+		folder = new File(savePath);
+		if (!folder.exists())
+			folder.mkdir();
+
+	}
+
+	public static void loadFont() {
+
+		InputStream is = LoadSave.class.getClassLoader().getResourceAsStream(fontName);
+
+		try {
+			gameFont = Font.createFont(Font.TRUETYPE_FONT, is);
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			ge.registerFont(gameFont);
+		} catch (FontFormatException | IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 
 	public static BufferedImage loadImage(String fileName) {
 
@@ -76,22 +118,6 @@ public class LoadSave {
 		convertedImg.getGraphics().drawImage(img, 0, 0, null);
 
 		return convertedImg;
-
-	}
-
-	public static void createFolders() {
-
-		File folder = new File(homePath + File.separator + gameFolder);
-		if (!folder.exists())
-			folder.mkdir();
-
-		folder = new File(mapPath);
-		if (!folder.exists())
-			folder.mkdir();
-
-		folder = new File(savePath);
-		if (!folder.exists())
-			folder.mkdir();
 
 	}
 

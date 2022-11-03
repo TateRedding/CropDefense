@@ -1,5 +1,10 @@
 package gamestates;
 
+import static helps.Constants.Crops.BELL_PEPPER;
+import static helps.Constants.Crops.CHILI;
+import static helps.Constants.Crops.CORN;
+import static helps.Constants.Crops.TOMATO;
+import static helps.Constants.Crops.getCooldown;
 import static helps.Constants.Crops.getCropCost;
 import static helps.Constants.Crops.getDefaultRange;
 import static helps.Constants.Enemies.getReward;
@@ -15,18 +20,19 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import crops.Crop;
-import crops.CropHandler;
-import enemies.Enemy;
-import enemies.EnemyHandler;
+import entities.Crop;
+import entities.CropHandler;
+import entities.Enemy;
+import entities.EnemyHandler;
+import entities.ProjectileHandler;
 import handlers.WaveHandler;
+import helps.DrawText;
 import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
 import objects.Map;
 import objects.Tile;
 import pathfinding.AStar;
-import projectiles.ProjectileHandler;
 import ui.ActionBar;
 import ui.EndGameOverlay;
 
@@ -49,8 +55,8 @@ public class Play extends MapState implements StateMethods, Serializable {
 	private int selectedCropColorIndex = -1;
 	private int currentPathIndex;
 	private int currentWave = 1, totalWaves;
-	private int seeds = 100;
-	private int lives = 5;
+	private int seeds = 200;
+	private int lives = 6;
 
 	private boolean paused, gameOver, lifeLostThisWave;
 
@@ -153,8 +159,13 @@ public class Play extends MapState implements StateMethods, Serializable {
 		if (justSaved)
 			drawSavedMessage(g);
 
-		if (gameOver && endGameOverlay != null)
-			endGameOverlay.draw(g);
+		if (!gameOver) {
+			if (paused && !unsavedOverlayActive)
+				drawPausedMessage(g);
+		} else {
+			if (endGameOverlay != null)
+				endGameOverlay.draw(g);
+		}
 
 		super.render(g);
 
@@ -195,7 +206,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 		if (waveHandler.isOnBreak()) {
 
 			g.setColor(Color.BLACK);
-			g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 40));
+			g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(56f));
 			DecimalFormat formatter = new DecimalFormat("0.0");
 			float timeLeft = waveHandler.getTimeLeft();
 			String text = "Next Wave Starting in: " + formatter.format(timeLeft) + "s";
@@ -211,7 +222,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 	private void drawSavedMessage(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 28));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(40f));
 
 		String text = "Game saved succesfully!";
 
@@ -219,6 +230,49 @@ public class Play extends MapState implements StateMethods, Serializable {
 		int y = Game.SCREEN_HEIGHT - 10;
 
 		g.drawString(text, x, y);
+
+	}
+
+	private void drawPausedMessage(Graphics g) {
+
+		int xStart = Game.SCREEN_WIDTH / 2 - ImageLoader.textBGLarge.getWidth() / 2;
+		int yStart = 100;
+		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, null);
+
+		g.setColor(Color.BLACK);
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(76f));
+
+		DrawText.drawTextCentered(g, "GAME PAUSED", xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight());
+
+	}
+
+	public void drawCropToolTip(Graphics g, int cropType) {
+
+		int xStart = 200;
+		int yStart = Game.SCREEN_HEIGHT - ImageLoader.textBGMed.getHeight() - 5;
+
+		g.drawImage(ImageLoader.textBGMed, xStart, yStart, null);
+
+		g.setColor(Color.BLACK);
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(28f));
+
+		String[] lines = null;
+		float seconds = Math.round(getCooldown(cropType) / (Game.UPS_SET) * 100) / 100.0f;
+
+		switch (cropType) {
+		case CORN -> lines = new String[] { "Corn. The most basic of crops.", "Shoots a single kernal",
+				"every " + seconds + " seconds" };
+		case TOMATO ->
+			lines = new String[] { "Tomatos shoot in short", "bursts of three seeds", "every " + seconds + " seconds" };
+		case CHILI -> lines = new String[] { "Pepper spray your enemies!", "Shoots a cone of pepper spray",
+				"every " + seconds + " seconds" };
+		case BELL_PEPPER ->
+			lines = new String[] { "The heavy hitter.", "Shoots a high damage seed", "every " + seconds + " seconds" };
+		}
+
+		DrawText.drawTextCentered(g, lines, 5, xStart, yStart + 4, ImageLoader.textBGMed.getWidth(),
+				ImageLoader.textBGMed.getHeight() - 4);
 
 	}
 
@@ -289,7 +343,8 @@ public class Play extends MapState implements StateMethods, Serializable {
 		lifeLostThisWave = true;
 		if (lives <= 0) {
 			paused = true;
-			endGameOverlay = new EndGameOverlay(this, EndGameOverlay.LOSE);
+			int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
+			endGameOverlay = new EndGameOverlay(this, EndGameOverlay.LOSE, yStart);
 			gameOver = true;
 		}
 
@@ -341,32 +396,34 @@ public class Play extends MapState implements StateMethods, Serializable {
 
 	public void mousePressed(int x, int y) {
 
-		if (unsavedOverlayActive && unsavedChangesOverlay != null)
-			super.mousePressed(x, y);
-		else if (gameOver && endGameOverlay != null)
-			endGameOverlay.mousePressed(x, y);
-		else if (actionBar.getBounds().contains(x, y))
-			actionBar.mousePressed(x, y);
+		super.mousePressed(x, y);
+
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
+			if (gameOver && endGameOverlay != null)
+				endGameOverlay.mousePressed(x, y);
+			else if (actionBar.getBounds().contains(x, y))
+				actionBar.mousePressed(x, y);
 
 	}
 
 	public void mouseReleased(int x, int y) {
 
-		if (unsavedOverlayActive && unsavedChangesOverlay != null)
-			super.mouseReleased(x, y);
-		else if (gameOver && endGameOverlay != null)
-			endGameOverlay.mouseReleased(x, y);
-		else if (actionBar.getBounds().contains(x, y))
-			actionBar.mouseReleased(x, y);
-		else if (!paused) {
-			if (selectedCropType != -1 && getTileAt(x, y).getTileType() == GRASS) {
-				if (canAffordCrop(selectedCropType)) {
-					cropHandler.plantCrop(selectedCropType, selectedCropColorIndex, x, y);
-					seeds -= getCropCost(selectedCropType);
-					selectedCropType = -1;
+		super.mouseReleased(x, y);
+
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
+			if (gameOver && endGameOverlay != null)
+				endGameOverlay.mouseReleased(x, y);
+			else if (actionBar.getBounds().contains(x, y))
+				actionBar.mouseReleased(x, y);
+			else if (!paused) {
+				if (selectedCropType != -1 && getTileAt(x, y).getTileType() == GRASS) {
+					if (canAffordCrop(selectedCropType)) {
+						cropHandler.plantCrop(selectedCropType, selectedCropColorIndex, x, y);
+						seeds -= getCropCost(selectedCropType);
+						selectedCropType = -1;
+					}
 				}
 			}
-		}
 		if (getCropAt(mouseX, mouseY) != null) {
 			selectedCrop = getCropAt(mouseX, mouseY);
 			actionBar.setSelectedCrop(selectedCrop);
@@ -377,7 +434,7 @@ public class Play extends MapState implements StateMethods, Serializable {
 	public void mouseMoved(int x, int y) {
 
 		super.mouseMoved(x, y);
-		if (!unsavedOverlayActive)
+		if (!unsavedOverlayActive && unsavedChangesOverlay == null)
 			if (actionBar.getBounds().contains(x, y))
 				actionBar.mouseMoved(x, y);
 

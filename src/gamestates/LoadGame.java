@@ -61,22 +61,19 @@ public class LoadGame extends SaveSelect {
 
 	public void mouseReleased(int x, int y) {
 
-		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
-			GameStates.setGameState(GameStates.MENU);
-			deleting = false;
-			selectedFile = null;
-		} else if (selectedFile != null) {
+		if (menu.getBounds().contains(x, y) && menu.isMousePressed())
+			switchAndReset(GameStates.MENU);
+		else if (selectedFile != null) {
 			if (load.getBounds().contains(x, y) && load.isMousePressed()) {
 				game.loadGame(selectedFile);
-				selectedFile = null;
-				GameStates.setGameState(GameStates.PLAY);
-				deleting = false;
+				switchAndReset(GameStates.PLAY);
 			} else if (delete.getBounds().contains(x, y) && delete.isMousePressed())
 				deleting = true;
 			if (deleting) {
 				if (yes.getBounds().contains(x, y) && yes.isMousePressed()) {
 					selectedFile.delete();
 					initSaveButtons();
+					game.getSaveGame().initSaveButtons();
 					selectedFile = null;
 					deleting = false;
 				} else if (no.getBounds().contains(x, y) && no.isMousePressed())
@@ -93,7 +90,20 @@ public class LoadGame extends SaveSelect {
 				}
 
 		super.mouseReleased(x, y);
-		load.setMousePressed(false);
+		load.reset();
+
+	}
+
+	public void mouseOver(int x, int y) {
+
+		load.setMouseOver(false);
+
+		super.mousePressed(x, y);
+
+		if (selectedFile != null) {
+			if (load.getBounds().contains(x, y))
+				load.setMouseOver(true);
+		}
 
 	}
 

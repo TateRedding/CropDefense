@@ -9,18 +9,14 @@ import javax.swing.JFrame;
 import gamestates.Edit;
 import gamestates.GameStates;
 import gamestates.Play;
+import helps.ImageLoader;
 import ui.UnsavedChangesOverlay;
 
 public class GameFrame extends JFrame {
 
 	private static final long serialVersionUID = -5213241656256282279L;
 
-	@SuppressWarnings("unused")
-	private GameScreen gameScreen;
-
 	public GameFrame(GameScreen gameScreen) {
-
-		this.gameScreen = gameScreen;
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		add(gameScreen);
@@ -36,21 +32,35 @@ public class GameFrame extends JFrame {
 
 				Play play = gameScreen.getGame().getPlay();
 				Edit edit = gameScreen.getGame().getEdit();
+				int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
 
-				if ((GameStates.gameState == GameStates.PLAY || GameStates.gameState == GameStates.SAVE_GAME)
-						&& play != null && play.isUnsavedChanges() && !play.isGameOver()) {
-					play.setPaused(true);
-					play.setUnsavedChangesOverlay(
-							new UnsavedChangesOverlay(gameScreen.getGame().getPlay(), UnsavedChangesOverlay.QUIT));
+				switch (GameStates.gameState) {
+
+				case PLAY, SAVE_GAME -> {
+
+					if (play == null || !play.isUnsavedChanges() || play.isGameOver())
+						System.exit(0);
+
+					play.setUnsavedChangesOverlay(new UnsavedChangesOverlay(gameScreen.getGame().getPlay(),
+							UnsavedChangesOverlay.QUIT, yStart));
 					play.setUnsavedOverlayActive(true);
+					play.setPaused(true);
+
 					if (GameStates.gameState == GameStates.SAVE_GAME)
 						GameStates.setGameState(GameStates.PLAY);
-				} else if (GameStates.gameState == GameStates.EDIT && edit != null && edit.isUnsavedChanges()) {
-					edit.setUnsavedChangesOverlay(
-							new UnsavedChangesOverlay(gameScreen.getGame().getEdit(), UnsavedChangesOverlay.QUIT));
+				}
+
+				case EDIT -> {
+					if (edit == null || !edit.isUnsavedChanges())
+						System.exit(0);
+
+					edit.setUnsavedChangesOverlay(new UnsavedChangesOverlay(gameScreen.getGame().getEdit(),
+							UnsavedChangesOverlay.QUIT, yStart));
 					edit.setUnsavedOverlayActive(true);
-				} else {
-					System.exit(0);
+				}
+
+				default -> System.exit(0);
+
 				}
 
 			}

@@ -20,7 +20,9 @@ import java.util.Arrays;
 
 import gamestates.Edit;
 import gamestates.GameStates;
+import helps.DrawText;
 import helps.ImageLoader;
+import helps.LoadSave;
 import main.Game;
 
 public class EditorBar extends UIBar {
@@ -89,26 +91,26 @@ public class EditorBar extends UIBar {
 
 	private void drawLabels(Graphics g) {
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
+		// Category Labels
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(32f));
 		g.setColor(Color.BLACK);
 
 		String label = "Terrain";
+		int textOffset = 8;
 		int xStart = (water.getBounds().x + water.getBounds().width / 2) - g.getFontMetrics().stringWidth(label) / 2;
-		int yStart = water.getBounds().y - (buttonOffset + 3);
-
+		int yStart = water.getBounds().y - textOffset;
 		g.drawString(label, xStart, yStart);
 
 		label = "Pathing";
 		xStart = (end.getBounds().x - buttonOffset / 2) - g.getFontMetrics().stringWidth(label) / 2;
-
 		g.drawString(label, xStart, yStart);
 
-		g.setFont(new Font(Game.FONT_NAME, Font.PLAIN, 15));
+		// Tile Labels
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(20f));
 
 		String[] labels = { "Grass", "Water", "Road", "Start", "End" };
 
-		yStart = grass.getBounds().y + grass.getBounds().height + g.getFontMetrics().getHeight();
-
+		yStart = grass.getBounds().y + grass.getBounds().height + textOffset + DrawText.getPixelHeight(g);
 		for (int i = 0; i < tileButtons.size(); i++) {
 			xStart = (tileButtons.get(i).getBounds().x + tileButtons.get(i).getBounds().width / 2)
 					- g.getFontMetrics().stringWidth(labels[i]) / 2;
@@ -135,7 +137,9 @@ public class EditorBar extends UIBar {
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
 			if (edit.isUnsavedChanges()) {
 				edit.setUnsavedOverlayActive(true);
-				edit.setUnsavedChangesOverlay(new UnsavedChangesOverlay(edit, UnsavedChangesOverlay.EXIT_TO_MENU));
+				int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
+				edit.setUnsavedChangesOverlay(
+						new UnsavedChangesOverlay(edit, UnsavedChangesOverlay.EXIT_TO_MENU, yStart));
 			} else {
 				GameStates.setGameState(GameStates.MENU);
 				edit.getGame().getMapHandler().loadMaps();
@@ -153,11 +157,29 @@ public class EditorBar extends UIBar {
 		else if (end.getBounds().contains(x, y) && end.isMousePressed())
 			edit.setSelectedPointType(END);
 
-		menu.setMousePressed(false);
-		save.setMousePressed(false);
+		for (SquareButton tb : tileButtons)
+			tb.reset();
+		menu.reset();
+		save.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
 
 		for (SquareButton tb : tileButtons)
-			tb.setMousePressed(false);
+			tb.setMouseOver(false);
+		menu.setMouseOver(false);
+		save.setMouseOver(false);
+
+		if (menu.getBounds().contains(x, y))
+			menu.setMouseOver(true);
+		else if (save.getBounds().contains(x, y))
+			save.setMouseOver(true);
+		else
+			for (SquareButton tb : tileButtons)
+				if (tb.getBounds().contains(x, y))
+					tb.setMouseOver(true);
+
 	}
 
 }

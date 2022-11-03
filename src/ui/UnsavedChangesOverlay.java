@@ -12,10 +12,10 @@ import java.awt.Graphics;
 import gamestates.Edit;
 import gamestates.GameStates;
 import gamestates.Play;
-import helps.ImageLoader;
-import main.Game;
+import helps.DrawText;
+import helps.LoadSave;
 
-public class UnsavedChangesOverlay {
+public class UnsavedChangesOverlay extends Overlay {
 
 	public static final int QUIT = 0;
 	public static final int EXIT_TO_MENU = 1;
@@ -24,30 +24,25 @@ public class UnsavedChangesOverlay {
 	private Play play;
 	private TextButton save, cont, cancel;
 
-	private int x, y, width, height;
 	private int exitCode;
 
-	public UnsavedChangesOverlay(Edit edit, int exitCode) {
+	public UnsavedChangesOverlay(Edit edit, int exitCode, int y) {
+
+		super(y);
 
 		this.edit = edit;
 		this.exitCode = exitCode;
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = Game.SCREEN_HEIGHT / 2 - height / 2;
 
 		initButtons();
 
 	}
 
-	public UnsavedChangesOverlay(Play play, int exitCode) {
+	public UnsavedChangesOverlay(Play play, int exitCode, int y) {
+
+		super(y);
 
 		this.play = play;
 		this.exitCode = exitCode;
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = Game.SCREEN_HEIGHT / 2 - height / 2;
 
 		initButtons();
 
@@ -55,10 +50,11 @@ public class UnsavedChangesOverlay {
 
 	private void initButtons() {
 
-		int xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
-		int yStart = y + 250;
+		int xStart = mainX + mainW / 2 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 5;
-		save = new TextButton(TEXT_LARGE, "Save and Continue", GRAY, xStart, yStart);
+		int totalButtonHeight = getButtonHeight(TEXT_LARGE) * 3 + yOffset * 2;
+		int yStart = mainY + mainH / 2 - totalButtonHeight / 2;
+		save = new TextButton(TEXT_LARGE, "Save & Continue", GRAY, xStart, yStart);
 		cont = new TextButton(TEXT_LARGE, "Continue", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 		cancel = new TextButton(TEXT_LARGE, "Cancel", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 
@@ -74,22 +70,18 @@ public class UnsavedChangesOverlay {
 
 	public void draw(Graphics g) {
 
-		g.drawImage(ImageLoader.overlayBG, x, y, null);
+		super.draw(g);
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 22));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(36f));
 		String lineOne = "";
 		if (edit != null)
 			lineOne = "You have unsaved changes!";
 		else if (play != null)
 			lineOne = "You haven't saved your game!";
-		String lineTwo = "Continue without saving?";
-		int xStart = x + width / 2 - g.getFontMetrics().stringWidth(lineOne) / 2;
-		int yStart = y + 43 + g.getFontMetrics().getHeight() / 5 * 2;
-		g.drawString(lineOne, xStart, yStart);
-		xStart = x + width / 2 - g.getFontMetrics().stringWidth(lineTwo) / 2;
-		yStart += g.getFontMetrics().getHeight();
-		g.drawString(lineTwo, xStart, yStart);
+		String[] lines = new String[] { lineOne, "Continue without saving?" };
+
+		DrawText.drawTextCentered(g, lines, 5, titleX, titleY, titleW, titleH);
 
 		save.draw(g);
 		cont.draw(g);
@@ -150,9 +142,24 @@ public class UnsavedChangesOverlay {
 			}
 		}
 
-		save.setMousePressed(false);
-		cont.setMousePressed(false);
-		cancel.setMousePressed(false);
+		save.reset();
+		cont.reset();
+		cancel.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		save.setMouseOver(false);
+		cont.setMouseOver(false);
+		cancel.setMouseOver(false);
+
+		if (save.getBounds().contains(x, y))
+			save.setMouseOver(true);
+		else if (cont.getBounds().contains(x, y))
+			cont.setMouseOver(true);
+		else if (cancel.getBounds().contains(x, y))
+			cancel.setMouseOver(true);
 
 	}
 

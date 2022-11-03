@@ -69,12 +69,18 @@ public abstract class MapState extends State implements StateMethods, Serializab
 
 	@Override
 	public void mousePressed(int x, int y) {
-		unsavedChangesOverlay.mousePressed(x, y);
+
+		if (unsavedOverlayActive && unsavedChangesOverlay != null)
+			unsavedChangesOverlay.mousePressed(x, y);
+
 	}
 
 	@Override
 	public void mouseReleased(int x, int y) {
-		unsavedChangesOverlay.mouseReleased(x, y);
+
+		if (unsavedOverlayActive && unsavedChangesOverlay != null)
+			unsavedChangesOverlay.mouseReleased(x, y);
+
 	}
 
 	@Override
@@ -88,6 +94,9 @@ public abstract class MapState extends State implements StateMethods, Serializab
 
 	@Override
 	public void mouseMoved(int x, int y) {
+
+		if (unsavedOverlayActive && unsavedChangesOverlay != null)
+			unsavedChangesOverlay.mouseMoved(x, y);
 
 		inGameArea = gameBounds.contains(x, y);
 		if (inGameArea)

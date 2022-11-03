@@ -14,9 +14,10 @@ public class Constants {
 		public static final int TEXT_LARGE = 2;
 		public static final int TEXT_SMALL = 3;
 
-		public static int getButtonWidth(int buttonSize) {
+		public static int getButtonWidth(int buttonType) {
 
-			switch (buttonSize) {
+			switch (buttonType) {
+
 			case MAP:
 				return 136;
 			case TEXT_LARGE:
@@ -31,9 +32,9 @@ public class Constants {
 
 		}
 
-		public static int getButtonHeight(int buttonSize) {
+		public static int getButtonHeight(int buttonType) {
 
-			switch (buttonSize) {
+			switch (buttonType) {
 			case MAP:
 				return 92;
 			case TEXT_LARGE:
@@ -123,7 +124,7 @@ public class Constants {
 			return 0.0f;
 		}
 
-		public static int getDefaultCooldown(int cropType) {
+		public static int getCooldown(int cropType) {
 
 			switch (cropType) {
 			case BELL_PEPPER:
@@ -139,11 +140,11 @@ public class Constants {
 			return 0;
 		}
 
-		public static int getDefaultTicksBetweenAttacks(int cropType) {
+		public static int getTicksBetweenAttacks(int cropType) {
 
 			switch (cropType) {
 			case CHILI:
-				return 3;
+				return 2;
 			case BELL_PEPPER:
 			case CORN:
 				return 0;
@@ -154,11 +155,11 @@ public class Constants {
 			return 0;
 		}
 
-		public static int getDefaultProjectilesPerAttack(int cropType) {
+		public static int getProjectilesPerAttack(int cropType) {
 
 			switch (cropType) {
 			case CHILI:
-				return 15;
+				return 20;
 			case BELL_PEPPER:
 			case CORN:
 				return 1;

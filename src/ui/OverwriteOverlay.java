@@ -4,38 +4,34 @@ import static helps.Constants.Buttons.BLUE;
 import static helps.Constants.Buttons.TEXT_LARGE;
 import static helps.Constants.Buttons.getButtonHeight;
 import static helps.Constants.Buttons.getButtonWidth;
-import static ui.UIBar.UI_HEIGHT;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
-import helps.ImageLoader;
-import main.Game;
+import helps.DrawText;
+import helps.LoadSave;
 
-public class OverwriteOverlay {
+public class OverwriteOverlay extends Overlay {
 
 	private NameFileOverlay nameFileOverlay;
 	private TextButton okay, cancel;
 
-	private int x, y, width, height;
+	public OverwriteOverlay(NameFileOverlay nameFileOverlay, int y) {
 
-	public OverwriteOverlay(NameFileOverlay nameFileOverlay) {
+		super(y);
 
 		this.nameFileOverlay = nameFileOverlay;
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = (Game.SCREEN_HEIGHT + UI_HEIGHT) / 2 - height / 2;
 		initButtons();
 
 	}
 
 	private void initButtons() {
 
-		int xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
-		int yStart = y + 250;
+		int xStart = mainX + mainW / 2 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 5;
+		int totalButtonHeight = getButtonHeight(TEXT_LARGE) * 2 + yOffset;
+		int yStart = mainY + mainH / 2 - totalButtonHeight / 2;
 		okay = new TextButton(TEXT_LARGE, "Okay", BLUE, xStart, yStart);
 		cancel = new TextButton(TEXT_LARGE, "Cancel", BLUE, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 
@@ -50,18 +46,13 @@ public class OverwriteOverlay {
 
 	public void draw(Graphics g) {
 
-		g.drawImage(ImageLoader.overlayBG, x, y, null);
+		super.draw(g);
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 22));
-		String lineOne = "A file with that name already exists!";
-		String lineTwo = "Overwrite file?";
-		int xStart = x + width / 2 - g.getFontMetrics().stringWidth(lineOne) / 2;
-		int yStart = y + 43 + g.getFontMetrics().getHeight() / 5 * 2;
-		g.drawString(lineOne, xStart, yStart);
-		xStart = x + width / 2 - g.getFontMetrics().stringWidth(lineTwo) / 2;
-		yStart += g.getFontMetrics().getHeight();
-		g.drawString(lineTwo, xStart, yStart);
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(28f));
+		String[] lines = new String[] { "A file with that name already exists!", "Overwrite file?" };
+
+		DrawText.drawTextCentered(g, lines, 5, titleX, titleY, titleW, titleH);
 
 		okay.draw(g);
 		cancel.draw(g);
@@ -87,8 +78,20 @@ public class OverwriteOverlay {
 		} else if (cancel.getBounds().contains(x, y) && cancel.isMousePressed())
 			nameFileOverlay.setOverwriting(false);
 
-		okay.setMousePressed(false);
-		cancel.setMousePressed(false);
+		okay.reset();
+		cancel.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		okay.setMouseOver(false);
+		cancel.setMouseOver(false);
+
+		if (okay.getBounds().contains(x, y))
+			okay.setMouseOver(true);
+		if (cancel.getBounds().contains(x, y))
+			cancel.setMouseOver(true);
 
 	}
 

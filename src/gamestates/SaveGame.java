@@ -6,11 +6,13 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+import helps.DrawText;
 import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
 import ui.NameFileOverlay;
 import ui.TextButton;
+import ui.UIBar;
 import ui.UnsavedChangesOverlay;
 
 public class SaveGame extends SaveSelect {
@@ -31,12 +33,12 @@ public class SaveGame extends SaveSelect {
 		int yStart = buttons.get(0).getBounds().y - ImageLoader.textBGLarge.getHeight() - 25;
 		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, null);
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(52f));
 		g.setColor(Color.BLACK);
 		String text = "Select a slot to save your game.";
-		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += ImageLoader.textBGLarge.getHeight() / 2 + g.getFontMetrics().getHeight() / 5 * 2;
-		g.drawString(text, xStart, yStart);
+
+		DrawText.drawTextCentered(g, text, xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight());
 
 		if (namingFile && nameFileOverlay != null)
 			nameFileOverlay.draw(g);
@@ -61,10 +63,11 @@ public class SaveGame extends SaveSelect {
 			if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
 				if (game.getPlay().isUnsavedChanges()) {
 					game.getPlay().setUnsavedOverlayActive(true);
+					int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
 					game.getPlay().setUnsavedChangesOverlay(
-							new UnsavedChangesOverlay(game.getPlay(), UnsavedChangesOverlay.EXIT_TO_MENU));
+							new UnsavedChangesOverlay(game.getPlay(), UnsavedChangesOverlay.EXIT_TO_MENU, yStart));
 					GameStates.setGameState(GameStates.PLAY);
-					menu.setMousePressed(false);
+					menu.reset();
 					return;
 				} else {
 					nameFileOverlay = null;
@@ -77,6 +80,7 @@ public class SaveGame extends SaveSelect {
 					if (yes.getBounds().contains(x, y) && yes.isMousePressed()) {
 						selectedFile.delete();
 						initSaveButtons();
+						game.getLoadGame().initSaveButtons();
 						selectedFile = null;
 						deleting = false;
 					} else if (no.getBounds().contains(x, y) && no.isMousePressed())
@@ -91,7 +95,8 @@ public class SaveGame extends SaveSelect {
 								LoadSave.savePath + File.separator + b.getText() + LoadSave.saveFileExtension);
 						selectedFile = saveFile;
 					} else {
-						nameFileOverlay = new NameFileOverlay(this);
+						int yStart = (Game.SCREEN_HEIGHT + UIBar.UI_HEIGHT) / 2 - ImageLoader.overlayBG.getHeight() / 2;
+						nameFileOverlay = new NameFileOverlay(this, yStart);
 						namingFile = true;
 					}
 

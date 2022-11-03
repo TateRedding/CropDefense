@@ -12,11 +12,10 @@ import java.io.File;
 
 import gamestates.GameStates;
 import gamestates.Play;
-import helps.ImageLoader;
+import helps.DrawText;
 import helps.LoadSave;
-import main.Game;
 
-public class EndGameOverlay {
+public class EndGameOverlay extends Overlay {
 
 	public static final int WIN = 0;
 	public static final int LOSE = 1;
@@ -24,17 +23,14 @@ public class EndGameOverlay {
 	private Play play;
 	private TextButton menu, reload, credits;
 
-	private int x, y, width, height;
 	private int endCode;
 
-	public EndGameOverlay(Play play, int endCode) {
+	public EndGameOverlay(Play play, int endCode, int y) {
+
+		super(y);
 
 		this.play = play;
 		this.endCode = endCode;
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = Game.SCREEN_HEIGHT / 2 - height / 2;
 
 		initButtons();
 
@@ -42,9 +38,10 @@ public class EndGameOverlay {
 
 	private void initButtons() {
 
-		int xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
-		int yStart = y + 250;
+		int xStart = mainX + mainW / 2 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 5;
+		int totalButtonHeight = getButtonHeight(TEXT_LARGE) * 2 + yOffset;
+		int yStart = mainY + mainH / 2 - totalButtonHeight / 2;
 		menu = new TextButton(TEXT_LARGE, "Main Menu", GRAY, xStart, yStart);
 		reload = new TextButton(TEXT_LARGE, "Reload", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
 		credits = new TextButton(TEXT_LARGE, "Credits", GRAY, xStart, yStart);
@@ -64,11 +61,8 @@ public class EndGameOverlay {
 
 	public void draw(Graphics g) {
 
-		g.drawImage(ImageLoader.overlayBG, x, y, null);
-
-		g.setColor(Color.BLACK);
+		super.draw(g);
 		String text = "You ";
-
 		if (endCode == WIN) {
 			text += "Win!";
 			credits.draw(g);
@@ -77,10 +71,10 @@ public class EndGameOverlay {
 			reload.draw(g);
 		}
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 55));
-		int xStart = x + width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		int yStart = y + 43 + g.getFontMetrics().getHeight() / 2;
-		g.drawString(text, xStart, yStart);
+		g.setColor(Color.BLACK);
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(64f));
+
+		DrawText.drawTextCentered(g, text, titleX, titleY, titleW, titleH);
 
 		menu.draw(g);
 
@@ -116,9 +110,26 @@ public class EndGameOverlay {
 					play.getGame().startNewGame(play.getMap());
 			}
 
-		menu.setMousePressed(false);
-		credits.setMousePressed(false);
-		reload.setMousePressed(false);
+		menu.reset();
+		credits.reset();
+		reload.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		menu.setMouseOver(false);
+		credits.setMouseOver(false);
+		reload.setMouseOver(false);
+
+		if (menu.getBounds().contains(x, y))
+			menu.setMouseOver(true);
+		else if (endCode == WIN) {
+			if (credits.getBounds().contains(x, y))
+				credits.setMouseOver(true);
+		} else if (endCode == LOSE)
+			if (reload.getBounds().contains(x, y))
+				reload.setMouseOver(true);
 
 	}
 

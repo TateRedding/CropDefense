@@ -93,7 +93,7 @@ public class Menu extends State implements StateMethods {
 		}
 
 		for (TextButton b : buttons)
-			b.setMousePressed(false);
+			b.reset();
 
 	}
 
@@ -104,6 +104,13 @@ public class Menu extends State implements StateMethods {
 
 	@Override
 	public void mouseMoved(int x, int y) {
+
+		for (TextButton b : buttons)
+			b.setMouseOver(false);
+
+		for (TextButton b : buttons)
+			if (b.getBounds().contains(x, y))
+				b.setMouseOver(true);
 
 	}
 

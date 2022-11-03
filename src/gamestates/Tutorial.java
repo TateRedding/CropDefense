@@ -8,31 +8,20 @@ import static helps.Constants.Buttons.getButtonWidth;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import helps.ImageLoader;
 import main.Game;
 import ui.TextButton;
 
-public class Tutorial extends State implements StateMethods {
+public abstract class Tutorial extends State implements StateMethods {
 
-	public static final int PLAY_TUTORIAL = 0;
-	public static final int EDIT_TUTORIAL = 1;
+	protected TextButton menu, next, start;
+	protected BufferedImage[] images;
 
-	private TextButton menu, next, start;
-	private BufferedImage[] screenshots;
+	protected int imageIndex, textLineOffset = 5;
 
-	private int screenIndex;
-	private int tutorialType;
-
-	public Tutorial(Game game, int tutorialType) {
+	public Tutorial(Game game) {
 
 		super(game);
-		this.tutorialType = tutorialType;
 		initButtons();
-
-		if (tutorialType == EDIT_TUTORIAL)
-			screenshots = ImageLoader.tutorialEdit;
-		else if (tutorialType == PLAY_TUTORIAL)
-			screenshots = ImageLoader.tutorialPlay;
 
 	}
 
@@ -49,7 +38,7 @@ public class Tutorial extends State implements StateMethods {
 
 		menu.update();
 
-		if (screenshots != null && screenIndex < screenshots.length - 1)
+		if (images != null && imageIndex < images.length - 1)
 			next.update();
 		else
 			start.update();
@@ -61,9 +50,9 @@ public class Tutorial extends State implements StateMethods {
 
 		menu.draw(g);
 
-		if (screenshots != null) {
-			g.drawImage(screenshots[screenIndex], 0, 0, null);
-			if (screenIndex < screenshots.length - 1)
+		if (images != null) {
+			g.drawImage(images[imageIndex], 0, 0, null);
+			if (imageIndex < images.length - 1)
 				next.draw(g);
 			else
 				start.draw(g);
@@ -81,7 +70,7 @@ public class Tutorial extends State implements StateMethods {
 
 		if (menu.getBounds().contains(x, y))
 			menu.setMousePressed(true);
-		else if (screenIndex < screenshots.length - 1) {
+		else if (imageIndex < images.length - 1) {
 			if (next.getBounds().contains(x, y))
 				next.setMousePressed(true);
 		} else if (start.getBounds().contains(x, y))
@@ -94,21 +83,14 @@ public class Tutorial extends State implements StateMethods {
 
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
 			GameStates.setGameState(GameStates.MENU);
-			screenIndex = 0;
-		} else if (screenIndex < screenshots.length - 1) {
+			imageIndex = 0;
+		} else if (imageIndex < images.length - 1) {
 			if (next.getBounds().contains(x, y) && next.isMousePressed())
-				screenIndex++;
-		} else if (start.getBounds().contains(x, y) && start.isMousePressed()) {
-			screenIndex = 0;
-			if (tutorialType == PLAY_TUTORIAL)
-				GameStates.setGameState(GameStates.PLAY_NEW_GAME);
-			else if (tutorialType == EDIT_TUTORIAL)
-				GameStates.setGameState(GameStates.EDIT_MAP);
+				imageIndex++;
 		}
 
-		menu.setMousePressed(false);
-		next.setMousePressed(false);
-		start.setMousePressed(false);
+		menu.reset();
+		next.reset();
 
 	}
 
@@ -119,6 +101,18 @@ public class Tutorial extends State implements StateMethods {
 
 	@Override
 	public void mouseMoved(int x, int y) {
+
+		menu.setMouseOver(false);
+		next.setMouseOver(false);
+		start.setMouseOver(false);
+
+		if (menu.getBounds().contains(x, y))
+			menu.setMouseOver(true);
+		else if (imageIndex < images.length - 1) {
+			if (next.getBounds().contains(x, y))
+				next.setMouseOver(true);
+		} else if (start.getBounds().contains(x, y))
+			start.setMouseOver(true);
 
 	}
 

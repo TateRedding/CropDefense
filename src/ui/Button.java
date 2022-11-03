@@ -25,8 +25,17 @@ public class Button {
 	public void update() {
 
 		index = 0;
-		if (mousePressed)
+		if (mouseOver)
 			index = 1;
+		if (mousePressed)
+			index = 2;
+
+	}
+
+	public void reset() {
+
+		mouseOver = false;
+		mousePressed = false;
 
 	}
 

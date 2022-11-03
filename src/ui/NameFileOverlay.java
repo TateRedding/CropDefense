@@ -4,7 +4,6 @@ import static helps.Constants.Buttons.GRAY;
 import static helps.Constants.Buttons.TEXT_LARGE;
 import static helps.Constants.Buttons.getButtonHeight;
 import static helps.Constants.Buttons.getButtonWidth;
-import static ui.UIBar.UI_HEIGHT;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,12 +14,11 @@ import java.io.File;
 import gamestates.EditMap;
 import gamestates.GameStates;
 import gamestates.SaveGame;
-import helps.ImageLoader;
+import helps.DrawText;
 import helps.LoadSave;
-import main.Game;
 import objects.Map;
 
-public class NameFileOverlay {
+public class NameFileOverlay extends Overlay {
 
 	private EditMap editMap;
 	private OverwriteOverlay overwriteOverlay;
@@ -28,31 +26,25 @@ public class NameFileOverlay {
 	private TextBox textBox;
 	private TextButton save, cancel;
 
-	private int x, y, width, height;
-
 	private boolean overwriting, invalidSaveName;
 
-	public NameFileOverlay(EditMap editMap) {
+	public NameFileOverlay(EditMap editMap, int y) {
+
+		super(y);
 
 		this.editMap = editMap;
-		this.overwriteOverlay = new OverwriteOverlay(this);
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = (Game.SCREEN_HEIGHT + UI_HEIGHT) / 2 - height / 2;
+		this.overwriteOverlay = new OverwriteOverlay(this, y);
 
 		initElements();
 
 	}
 
-	public NameFileOverlay(SaveGame saveGame) {
+	public NameFileOverlay(SaveGame saveGame, int y) {
+
+		super(y);
 
 		this.saveGame = saveGame;
-		this.overwriteOverlay = new OverwriteOverlay(this);
-		this.width = ImageLoader.overlayBG.getWidth();
-		this.height = ImageLoader.overlayBG.getHeight();
-		this.x = Game.SCREEN_WIDTH / 2 - width / 2;
-		this.y = (Game.SCREEN_HEIGHT + UI_HEIGHT) / 2 - height / 2;
+		this.overwriteOverlay = new OverwriteOverlay(this, y);
 
 		initElements();
 
@@ -60,20 +52,24 @@ public class NameFileOverlay {
 
 	private void initElements() {
 
-		int textBoxWidth = width - 100;
-		int xStart = x + width / 2 - textBoxWidth / 2;
-		int yStart = y + 200;
-
-		textBox = new TextBox(xStart, yStart, textBoxWidth, new Font(Game.FONT_NAME, Font.PLAIN, 25));
-		textBox.setCharLimit(15);
-
-		xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
+		int xStart = x + width / 2 - getButtonWidth(TEXT_LARGE) / 2;
 		int yOffset = 5;
+		int totalButtonHeight = getButtonHeight(TEXT_LARGE) * 2 + yOffset;
+		int yStart = mainY + mainH / 2 - totalButtonHeight / 2;
 		String text = "Save";
 		if (editMap != null)
 			text = "Start";
-		save = new TextButton(TEXT_LARGE, text, GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
+		save = new TextButton(TEXT_LARGE, text, GRAY, xStart, yStart);
 		cancel = new TextButton(TEXT_LARGE, "Cancel", GRAY, xStart, yStart += yOffset + getButtonHeight(TEXT_LARGE));
+
+		int textBoxWidth = width - 100;
+		Font font = LoadSave.gameFont.deriveFont(48f);
+		int textBoxHeight = DrawText.getPixelHeight(font) + 4;
+		xStart = mainX + mainW / 2 - textBoxWidth / 2;
+		yStart = mainY + (save.getBounds().y - mainY) / 2 - textBoxHeight / 2;
+
+		textBox = new TextBox(xStart, yStart, textBoxWidth, font);
+		textBox.setCharLimit(15);
 
 	}
 
@@ -97,38 +93,32 @@ public class NameFileOverlay {
 			overwriteOverlay.draw(g);
 		else {
 
-			g.drawImage(ImageLoader.overlayBG, x, y, null);
+			super.draw(g);
 
-			g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
-
+			g.setColor(Color.BLACK);
+			g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(48f));
 			String text = "";
 			if (editMap != null)
 				text = "Name your new map";
 			else if (saveGame != null)
 				text = "Name your save file";
 
-			int xStart = x + width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-			int yStart = y + 62 + g.getFontMetrics().getHeight() / 5 * 2;
-			g.drawString(text, xStart, yStart);
+			DrawText.drawTextCentered(g, text, titleX, titleY, titleW, titleH);
 
 			textBox.draw(g);
 			save.draw(g);
 			cancel.draw(g);
 
 			if (invalidSaveName) {
-				text = "Invalid file name!";
-				g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 25));
-				g.setColor(Color.RED);
-				xStart = x + (width / 2 - g.getFontMetrics().stringWidth(text) / 2);
-				yStart = y + height - 90;
-				g.drawString(text, xStart, yStart);
 
-				text = "Please choose another name.";
-				g.setFont(new Font(Game.FONT_NAME, Font.PLAIN, 22));
-				g.setColor(Color.BLACK);
-				xStart = x + (width / 2 - g.getFontMetrics().stringWidth(text) / 2);
-				yStart = y + height - 65;
-				g.drawString(text, xStart, yStart);
+				g.setColor(Color.RED);
+				g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(32f));
+				String[] lines = new String[] { "Invalid file name!", "Please choose another name." };
+				int areaYStart = cancel.getBounds().y + cancel.getBounds().height;
+				int areaHeight = mainY + mainH - areaYStart;
+
+				DrawText.drawTextCentered(g, lines, 5, mainX, areaYStart, mainW, areaHeight);
+
 			}
 
 		}
@@ -213,9 +203,26 @@ public class NameFileOverlay {
 				}
 			}
 
-			save.setMousePressed(false);
-			cancel.setMousePressed(false);
+			save.reset();
+			cancel.reset();
 
+		}
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		save.setMouseOver(false);
+		cancel.setMouseOver(false);
+
+		if (overwriting)
+			overwriteOverlay.mouseMoved(x, y);
+		else {
+
+			if (save.getBounds().contains(x, y))
+				save.setMouseOver(true);
+			else if (cancel.getBounds().contains(x, y))
+				cancel.setMouseOver(true);
 		}
 
 	}

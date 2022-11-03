@@ -70,6 +70,10 @@ public class Map implements Serializable {
 		return tileData;
 	}
 
+	public void setTileData(Tile[][] tileData) {
+		this.tileData = tileData;
+	}
+
 	public String getMapName() {
 		return mapName;
 	}

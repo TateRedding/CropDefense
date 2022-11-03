@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 
+import helps.DrawText;
+
 public class TextBox {
 
 	private Font font;
@@ -14,7 +16,7 @@ public class TextBox {
 	private int charLimit = 25;
 	private int cursorTick, cursorTickMax = 25;
 	private int cursorIndex;
-	private int textX;
+	private int textX, textOffset;
 
 	private boolean showCursor = true;
 
@@ -24,8 +26,9 @@ public class TextBox {
 		this.y = y;
 		this.width = width;
 		this.font = font;
-		this.height = (int) (font.getSize() * 1.2) + 4;
-		this.textX = x + 4;
+		this.textOffset = 8;
+		this.height = DrawText.getPixelHeight(font) + textOffset;
+		this.textX = x + textOffset;
 
 	}
 
@@ -45,7 +48,7 @@ public class TextBox {
 		g.drawRect(x, y, width, height);
 
 		g.setFont(font);
-		int yStart = y + (int) (g.getFontMetrics().getHeight() * 0.75);
+		int yStart = y + height - textOffset / 2;
 		g.drawString(text, textX, yStart);
 
 		if (showCursor)
@@ -58,9 +61,10 @@ public class TextBox {
 		int cursorX = textX + 1;
 		if (text != "")
 			cursorX = textX + g.getFontMetrics().stringWidth(text.substring(0, cursorIndex)) + 1;
-		int cursorY = y + 4;
+		int cursorOffset = 4;
+		int cursorY = y + cursorOffset;
 
-		g.drawRect(cursorX, cursorY, 1, height - 8);
+		g.drawRect(cursorX, cursorY, 1, height - cursorOffset * 2);
 
 	}
 

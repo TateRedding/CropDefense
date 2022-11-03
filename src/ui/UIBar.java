@@ -11,7 +11,7 @@ public class UIBar {
 	public static final int Y = SCREEN_HEIGHT;
 	public static final int UI_WIDTH = SCREEN_WIDTH;
 	public static final int UI_HEIGHT = 160;
-	
+
 	protected Rectangle bounds;
 
 	public UIBar() {

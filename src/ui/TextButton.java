@@ -1,5 +1,6 @@
 package ui;
 
+import static helps.Constants.Buttons.TEXT_LARGE;
 import static helps.Constants.Buttons.TEXT_SMALL;
 import static helps.Constants.Buttons.getButtonHeight;
 import static helps.Constants.Buttons.getButtonWidth;
@@ -8,8 +9,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
+import helps.DrawText;
 import helps.ImageLoader;
-import main.Game;
+import helps.LoadSave;
 
 public class TextButton extends Button {
 
@@ -42,29 +44,23 @@ public class TextButton extends Button {
 
 	private void drawText(Graphics g) {
 
-		int fontSize = 20;
+		float fontSize = 24f;
+		int areaHeight = getButtonHeight(buttonSize) - 2;
+		int yStart = y;
 
-		if (buttonSize == TEXT_SMALL)
-			fontSize = 12;
-
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, fontSize));
-		g.setColor(Color.BLACK);
-
-		int w = g.getFontMetrics().stringWidth(text);
-		int yOffset = 10;
-		if (buttonSize == TEXT_SMALL)
-			yOffset = 6;
-		int xStart = x - w / 2 + width / 2;
-		int yStart = y + yOffset + height / 2;
-
-		if (!mousePressed) {
-			if (buttonSize == TEXT_SMALL)
-				yStart -= 2;
-			else
-				yStart -= 4;
+		if (buttonSize == TEXT_LARGE) {
+			fontSize = 32f;
+			areaHeight -= 2;
+		}
+		if (mousePressed) {
+			yStart += 2;
+			if (buttonSize == TEXT_LARGE)
+				yStart += 2;
 		}
 
-		g.drawString(text, xStart, yStart);
+		g.setFont(LoadSave.gameFont.deriveFont(fontSize).deriveFont(Font.BOLD));
+		g.setColor(Color.BLACK);
+		DrawText.drawTextCentered(g, text, x, yStart, width, areaHeight);
 
 	}
 

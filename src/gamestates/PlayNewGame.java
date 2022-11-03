@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import helps.DrawText;
 import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
@@ -98,18 +99,13 @@ public class PlayNewGame extends MapSelect {
 		int yStart = 100;
 		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, null);
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(36f));
 		g.setColor(Color.BLACK);
-		String text = "WARNING: There are no empty save slots!";
-		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += ImageLoader.textBGLarge.getHeight() / 2;
-		g.drawString(text, xStart, yStart);
+		String[] lines = new String[] { "WARNING: There are no empty save slots!",
+				"You will need to delete one if you wish to save your new game." };
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 25));
-		text = "You will need to delete one if you wish to save your new game.";
-		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += g.getFontMetrics().getHeight() / 5 * 4;
-		g.drawString(text, xStart, yStart);
+		DrawText.drawTextCentered(g, lines, 5, xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight());
 
 	}
 
@@ -119,18 +115,12 @@ public class PlayNewGame extends MapSelect {
 		int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.textBGLarge.getHeight() / 2;
 		g.drawImage(ImageLoader.textBGLarge, xStart, yStart, null);
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 30));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(44f));
 		g.setColor(Color.BLACK);
-		String text = "No maps to play on!";
-		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += ImageLoader.textBGLarge.getHeight() / 2;
-		g.drawString(text, xStart, yStart);
 
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 25));
-		text = "Please create a map to start a new game.";
-		xStart = Game.SCREEN_WIDTH / 2 - g.getFontMetrics().stringWidth(text) / 2;
-		yStart += g.getFontMetrics().getHeight() / 5 * 4;
-		g.drawString(text, xStart, yStart);
+		String[] lines = new String[] { "No maps to play on!", "Please create a map to start a new game." };
+		DrawText.drawTextCentered(g, lines, 5, xStart, yStart, ImageLoader.textBGLarge.getWidth(),
+				ImageLoader.textBGLarge.getHeight());
 
 	}
 
@@ -150,14 +140,11 @@ public class PlayNewGame extends MapSelect {
 	public void mouseReleased(int x, int y) {
 
 		if (menu.getBounds().contains(x, y) && menu.isMousePressed()) {
-			GameStates.setGameState(GameStates.MENU);
 			initMapButtons();
 			game.getEditMap().initMapButtons();
-			deleting = false;
-			selectedFile = null;
+			switchAndReset(GameStates.MENU);
 		} else if (tutorial.getBounds().contains(x, y) && tutorial.isMousePressed()) {
-			game.setTutorial(new Tutorial(game, Tutorial.PLAY_TUTORIAL));
-			GameStates.setGameState(GameStates.TUTORIAL);
+			switchAndReset(GameStates.PLAY_TUTORIAL);
 		}
 
 		if (selectedFile != null) {
@@ -170,7 +157,7 @@ public class PlayNewGame extends MapSelect {
 						map = m;
 				if (map != null) {
 					game.startNewGame(map);
-					GameStates.setGameState(GameStates.PLAY);
+					switchAndReset(GameStates.PLAY);
 				} else
 					System.out.println("Map file not found!");
 			} else if (delete.getBounds().contains(x, y) && delete.isMousePressed())
@@ -189,8 +176,24 @@ public class PlayNewGame extends MapSelect {
 					selectedFile = mapHandler.getMapFiles().get(i);
 
 		super.mouseReleased(x, y);
-		tutorial.setMousePressed(false);
-		start.setMousePressed(false);
+		tutorial.reset();
+		start.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		tutorial.setMouseOver(false);
+		start.setMouseOver(false);
+
+		super.mouseMoved(x, y);
+
+		if (tutorial.getBounds().contains(x, y))
+			tutorial.setMouseOver(true);
+		if (selectedFile != null) {
+			if (start.getBounds().contains(x, y))
+				start.setMouseOver(true);
+		}
 
 	}
 

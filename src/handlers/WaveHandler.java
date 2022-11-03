@@ -11,8 +11,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import enemies.Enemy;
+import entities.Enemy;
 import gamestates.Play;
+import helps.ImageLoader;
+import main.Game;
 import objects.Wave;
 import ui.EndGameOverlay;
 
@@ -145,7 +147,8 @@ public class WaveHandler implements Serializable {
 			onBreak = true;
 		else {
 			play.setGameOver(true);
-			play.setEndGameOverlay(new EndGameOverlay(play, EndGameOverlay.WIN));
+			int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.overlayBG.getHeight() / 2;
+			play.setEndGameOverlay(new EndGameOverlay(play, EndGameOverlay.WIN, yStart));
 		}
 
 	}

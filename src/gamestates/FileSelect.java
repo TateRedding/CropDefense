@@ -12,8 +12,15 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 
+import helps.DrawText;
 import helps.ImageLoader;
+import helps.LoadSave;
 import main.Game;
 import ui.TextButton;
 
@@ -75,38 +82,66 @@ public abstract class FileSelect extends State implements StateMethods {
 
 		if (selectedFile != null) {
 			delete.draw(g);
-			drawSelectedFileBG(g);
+			drawLastSavedInformation(g);
 
 			if (deleting) {
+				yes.draw(g);
+				no.draw(g);
+
 				int xStart = delete.getBounds().x + delete.getBounds().width / 2
 						- ImageLoader.textBGSmall.getWidth() / 2;
 				int yStart = delete.getBounds().y - ImageLoader.textBGSmall.getHeight() - getButtonHeight(TEXT_LARGE)
 						- 20;
 				g.drawImage(ImageLoader.textBGSmall, xStart, yStart, null);
-				g.setColor(Color.BLACK);
-				g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 23));
-				String text = "Are you sure you want";
-				xStart = delete.getBounds().x + delete.getBounds().width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-				yStart += ImageLoader.textBGSmall.getHeight() / 2 - 5;
-				g.drawString(text, xStart, yStart);
 
-				text = "to delete this file?";
-				xStart = delete.getBounds().x + delete.getBounds().width / 2 - g.getFontMetrics().stringWidth(text) / 2;
-				yStart += g.getFontMetrics().getHeight() / 5 * 4;
-				g.drawString(text, xStart, yStart);
-				yes.draw(g);
-				no.draw(g);
+				g.setColor(Color.BLACK);
+				g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(32f));
+				String[] lines = new String[] { "Are you sure you want", "to delete this file?" };
+				DrawText.drawTextCentered(g, lines, 5, xStart, yStart, ImageLoader.textBGSmall.getWidth(),
+						ImageLoader.textBGSmall.getHeight());
+
 			}
 
 		}
 
 	}
 
-	private void drawSelectedFileBG(Graphics g) {
+	private void drawLastSavedInformation(Graphics g) {
 
 		int xStart = Game.SCREEN_WIDTH / 4 - ImageLoader.textBGSmall.getWidth() / 2;
 		int yStart = Game.SCREEN_HEIGHT / 2 - ImageLoader.textBGSmall.getHeight() / 2;
 		g.drawImage(ImageLoader.textBGSmall, xStart, yStart, null);
+
+		Path filePath = Paths.get(selectedFile.getAbsolutePath());
+		BasicFileAttributes attr = null;
+		try {
+			attr = Files.readAttributes(filePath, BasicFileAttributes.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		String creationTime = "" + attr.creationTime();
+		String month = creationTime.substring(5, 7);
+		String day = creationTime.substring(8, 10);
+		String year = creationTime.substring(2, 4);
+		String saveName = "" + selectedFile.getName().substring(0,
+				selectedFile.getName().length() - LoadSave.saveFileExtension.length());
+		String lastSaved = "Last saved on: " + month + "/" + day + "/" + year;
+		String[] lines = new String[] { "Selected file:", saveName, lastSaved };
+
+		g.setColor(Color.BLACK);
+		g.setFont(LoadSave.gameFont.deriveFont(32f));
+
+		DrawText.drawTextCentered(g, lines, 5, xStart, yStart, ImageLoader.textBGSmall.getWidth(),
+				ImageLoader.textBGSmall.getHeight());
+
+	}
+
+	protected void switchAndReset(GameStates gameState) {
+
+		deleting = false;
+		selectedFile = null;
+		GameStates.setGameState(gameState);
 
 	}
 
@@ -136,10 +171,10 @@ public abstract class FileSelect extends State implements StateMethods {
 	@Override
 	public void mouseReleased(int x, int y) {
 
-		menu.setMousePressed(false);
-		delete.setMousePressed(false);
-		yes.setMousePressed(false);
-		no.setMousePressed(false);
+		menu.reset();
+		delete.reset();
+		yes.reset();
+		no.reset();
 
 	}
 
@@ -150,6 +185,24 @@ public abstract class FileSelect extends State implements StateMethods {
 
 	@Override
 	public void mouseMoved(int x, int y) {
+
+		menu.setMouseOver(false);
+		delete.setMouseOver(false);
+		yes.setMouseOver(false);
+		no.setMouseOver(false);
+
+		if (menu.getBounds().contains(x, y))
+			menu.setMouseOver(true);
+		else if (selectedFile != null) {
+			if (delete.getBounds().contains(x, y))
+				delete.setMouseOver(true);
+			if (deleting) {
+				if (yes.getBounds().contains(x, y))
+					yes.setMouseOver(true);
+				else if (no.getBounds().contains(x, y))
+					no.setMouseOver(true);
+			}
+		}
 
 	}
 

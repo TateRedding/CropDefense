@@ -6,15 +6,12 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
 import handlers.MapHandler;
+import helps.DrawText;
 import helps.ImageLoader;
 import helps.LoadSave;
 import main.Game;
@@ -48,9 +45,6 @@ public abstract class MapSelect extends FileSelect {
 		for (MapButton b : buttons)
 			b.draw(g);
 
-		if (selectedFile != null)
-			drawLastSavedInformation(g);
-
 		drawMapNames(g);
 
 	}
@@ -58,53 +52,20 @@ public abstract class MapSelect extends FileSelect {
 	private void drawMapNames(Graphics g) {
 
 		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
+		g.setFont(LoadSave.gameFont.deriveFont(Font.BOLD).deriveFont(24f));
 
 		ArrayList<File> mapFiles = mapHandler.getMapFiles();
 		for (int i = 0; i < mapFiles.size(); i++) {
 
 			int xStart = (buttons.get(i).getBounds().x + buttons.get(i).getBounds().width / 2)
 					- ImageLoader.mapNameBG.getWidth() / 2;
-			int yStart = buttons.get(i).getBounds().y - ImageLoader.mapNameBG.getHeight();
+			int yStart = buttons.get(i).getBounds().y - ImageLoader.mapNameBG.getHeight() - 1;
 			g.drawImage(ImageLoader.mapNameBG, xStart, yStart, null);
 
-			xStart = (buttons.get(i).getBounds().x + buttons.get(i).getBounds().width / 2)
-					- g.getFontMetrics().stringWidth(mapNames[i]) / 2;
-			yStart += ImageLoader.mapNameBG.getHeight() / 2 + g.getFontMetrics().getHeight() / 4;
-			g.drawString(mapNames[i], xStart, yStart);
+			DrawText.drawTextCentered(g, mapNames[i], xStart, yStart, ImageLoader.mapNameBG.getWidth(),
+					ImageLoader.mapNameBG.getHeight());
 
 		}
-
-	}
-
-	private void drawLastSavedInformation(Graphics g) {
-
-		Path filePath = Paths.get(selectedFile.getAbsolutePath());
-		BasicFileAttributes attr = null;
-		try {
-			attr = Files.readAttributes(filePath, BasicFileAttributes.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		int xStart = Game.SCREEN_WIDTH / 4 - ImageLoader.textBGSmall.getWidth() / 2 + 10;
-		int yStart = Game.SCREEN_HEIGHT / 2 - 2;
-
-		String creationTime = "" + attr.creationTime();
-		String month = creationTime.substring(5, 7);
-		String day = creationTime.substring(8, 10);
-		String year = creationTime.substring(0, 4);
-		String saveName = "Selected map: " + selectedFile.getName().substring(0,
-				selectedFile.getName().length() - LoadSave.saveFileExtension.length());
-		String lastSaved = "Last saved on: " + month + "/" + day + "/" + year;
-
-		g.setColor(Color.BLACK);
-		g.setFont(new Font(Game.FONT_NAME, Font.BOLD, 20));
-
-		g.drawString(saveName, xStart, yStart);
-
-		yStart += g.getFontMetrics().getHeight() / 5 * 4;
-		g.drawString(lastSaved, xStart, yStart);
 
 	}
 
@@ -155,7 +116,20 @@ public abstract class MapSelect extends FileSelect {
 
 		super.mouseReleased(x, y);
 		for (MapButton b : buttons)
-			b.setMousePressed(false);
+			b.reset();
+
+	}
+
+	public void mouseMoved(int x, int y) {
+
+		super.mouseMoved(x, y);
+
+		for (MapButton b : buttons)
+			b.setMouseOver(false);
+
+		for (MapButton b : buttons)
+			if (b.getBounds().contains(x, y))
+				b.setMouseOver(true);
 
 	}
 

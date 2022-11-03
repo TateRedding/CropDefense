@@ -8,13 +8,14 @@ import java.io.ObjectInputStream;
 import gamestates.Credits;
 import gamestates.Edit;
 import gamestates.EditMap;
+import gamestates.EditTutorial;
 import gamestates.GameStates;
 import gamestates.LoadGame;
 import gamestates.Menu;
 import gamestates.Play;
 import gamestates.PlayNewGame;
+import gamestates.PlayTutorial;
 import gamestates.SaveGame;
-import gamestates.Tutorial;
 import handlers.MapHandler;
 import handlers.TileHandler;
 import helps.ImageLoader;
@@ -24,8 +25,6 @@ import ui.ActionBar;
 
 public class Game implements Runnable {
 
-	public static final String FONT_NAME = "LucidaSans";
-
 	public static final int TILE_SIZE = 32;
 	public static final int GRID_WIDTH = 32;
 	public static final int GRID_HEIGHT = 20;
@@ -33,24 +32,23 @@ public class Game implements Runnable {
 	public static final int SCREEN_HEIGHT = TILE_SIZE * GRID_HEIGHT;
 
 	private static final double FPS_SET = 120.0;
-	private static final double UPS_SET = 60.0;
+	public static final double UPS_SET = 60.0;
 
 	private GameScreen gameScreen;
-	@SuppressWarnings("unused")
-	private GameFrame gameFrame;
 	private Thread gameThread;
 
 	private Credits credits;
 	private Edit edit;
 	private EditMap editMap;
+	private EditTutorial editTutorial;
 	private LoadGame loadGame;
 	private MapHandler mapHandler;
 	private Menu menu;
 	private Play play;
 	private PlayNewGame playNewGame;
+	private PlayTutorial playTutorial;
 	private SaveGame saveGame;
 	private TileHandler tileHandler;
-	private Tutorial tutorial;
 
 	public static void main(String[] args) {
 
@@ -69,12 +67,13 @@ public class Game implements Runnable {
 	public Game() {
 
 		LoadSave.createFolders();
+		LoadSave.loadFont();
 		ImageLoader.loadImages();
 
 		initClasses();
 
 		gameScreen = new GameScreen(this);
-		gameFrame = new GameFrame(gameScreen);
+		new GameFrame(gameScreen);
 		gameScreen.requestFocus();
 
 	}
@@ -86,9 +85,11 @@ public class Game implements Runnable {
 
 		credits = new Credits(this);
 		editMap = new EditMap(this);
+		editTutorial = new EditTutorial(this);
 		loadGame = new LoadGame(this);
 		menu = new Menu(this);
 		playNewGame = new PlayNewGame(this);
+		playTutorial = new PlayTutorial(this);
 		saveGame = new SaveGame(this);
 
 	}
@@ -140,35 +141,18 @@ public class Game implements Runnable {
 	private void updateGame() {
 
 		switch (GameStates.gameState) {
-		case CREDITS:
-			credits.update();
-			break;
-		case EDIT:
-			edit.update();
-			break;
-		case EDIT_MAP:
-			editMap.update();
-			break;
-		case LOAD_GAME:
-			loadGame.update();
-			break;
-		case MENU:
-			menu.update();
-			break;
-		case PLAY:
-			play.update();
-			break;
-		case PLAY_NEW_GAME:
-			playNewGame.update();
-			break;
-		case SAVE_GAME:
-			saveGame.update();
-			break;
-		case TUTORIAL:
-			tutorial.update();
-			break;
-		default:
-			break;
+
+		case CREDITS -> credits.update();
+		case EDIT -> edit.update();
+		case EDIT_MAP -> editMap.update();
+		case EDIT_TUTORIAL -> editTutorial.update();
+		case LOAD_GAME -> loadGame.update();
+		case MENU -> menu.update();
+		case PLAY -> play.update();
+		case PLAY_NEW_GAME -> playNewGame.update();
+		case PLAY_TUTORIAL -> playTutorial.update();
+		case SAVE_GAME -> saveGame.update();
+
 		}
 
 	}
@@ -176,35 +160,18 @@ public class Game implements Runnable {
 	public void render(Graphics g) {
 
 		switch (GameStates.gameState) {
-		case CREDITS:
-			credits.render(g);
-			break;
-		case EDIT:
-			edit.render(g);
-			break;
-		case EDIT_MAP:
-			editMap.render(g);
-			break;
-		case LOAD_GAME:
-			loadGame.render(g);
-			break;
-		case MENU:
-			menu.render(g);
-			break;
-		case PLAY:
-			play.render(g);
-			break;
-		case PLAY_NEW_GAME:
-			playNewGame.render(g);
-			break;
-		case SAVE_GAME:
-			saveGame.render(g);
-			break;
-		case TUTORIAL:
-			tutorial.render(g);
-			break;
-		default:
-			break;
+
+		case CREDITS -> credits.render(g);
+		case EDIT -> edit.render(g);
+		case EDIT_MAP -> editMap.render(g);
+		case EDIT_TUTORIAL -> editTutorial.render(g);
+		case LOAD_GAME -> loadGame.render(g);
+		case MENU -> menu.render(g);
+		case PLAY -> play.render(g);
+		case PLAY_NEW_GAME -> playNewGame.render(g);
+		case PLAY_TUTORIAL -> playTutorial.render(g);
+		case SAVE_GAME -> saveGame.render(g);
+
 		}
 	}
 
@@ -258,6 +225,10 @@ public class Game implements Runnable {
 		return editMap;
 	}
 
+	public EditTutorial getEditTutorial() {
+		return editTutorial;
+	}
+
 	public LoadGame getLoadGame() {
 		return loadGame;
 	}
@@ -278,16 +249,12 @@ public class Game implements Runnable {
 		return playNewGame;
 	}
 
+	public PlayTutorial getPlayTutorial() {
+		return playTutorial;
+	}
+
 	public SaveGame getSaveGame() {
 		return saveGame;
-	}
-
-	public Tutorial getTutorial() {
-		return tutorial;
-	}
-
-	public void setTutorial(Tutorial tutorial) {
-		this.tutorial = tutorial;
 	}
 
 }
