@@ -55,8 +55,8 @@ public class Play extends MapState implements StateMethods, Serializable {
 	private int selectedCropColorIndex = -1;
 	private int currentPathIndex;
 	private int currentWave = 1, totalWaves;
-	private int seeds = 200;
-	private int lives = 6;
+	private int seeds = 100;
+	private int lives = 5;
 
 	private boolean paused, gameOver, lifeLostThisWave;
 
